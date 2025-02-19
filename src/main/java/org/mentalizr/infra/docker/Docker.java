@@ -1,5 +1,6 @@
 package org.mentalizr.infra.docker;
 
+import de.arthurpicht.console.Console;
 import de.arthurpicht.processExecutor.ProcessExecutionException;
 import de.arthurpicht.processExecutor.ProcessResultCollection;
 import de.arthurpicht.utils.core.strings.Strings;
@@ -20,8 +21,7 @@ public class Docker {
         ProcessResultCollection result;
         try {
             result = DockerProcessExecution.execute(
-                    dockerExecutionContext.getLogger(),
-                    dockerExecutionContext.isVerbose(),
+                    dockerExecutionContext,
                     commands);
         } catch (ProcessExecutionException e) {
             throw new DockerExecutionException("Execution of docker command failed: " + e.getMessage(), e);
@@ -40,8 +40,7 @@ public class Docker {
         ProcessResultCollection result;
         try {
             result = DockerProcessExecution.execute(
-                    dockerExecutionContext.getLogger(),
-                    dockerExecutionContext.isVerbose(),
+                    dockerExecutionContext,
                     inputStream,
                     commands);
         } catch (ProcessExecutionException e) {
@@ -60,7 +59,7 @@ public class Docker {
         dockerExecutionContext
                 .getLogger()
                 .debug(commandString);
-        if (dockerExecutionContext.isVerbose()) System.out.println(commandString);
+        Console.printlnVerbose(commandString);
     }
 
     private static DockerExecutionException createException(ProcessResultCollection result) {

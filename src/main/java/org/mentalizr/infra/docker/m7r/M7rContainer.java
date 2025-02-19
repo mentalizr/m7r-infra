@@ -1,5 +1,6 @@
 package org.mentalizr.infra.docker.m7r;
 
+import de.arthurpicht.console.Console;
 import de.arthurpicht.processExecutor.ProcessResultCollection;
 import org.mentalizr.infra.Const;
 import org.mentalizr.infra.DockerExecutionException;
@@ -85,10 +86,8 @@ public class M7rContainer {
         DockerExecutionContext context = ApplicationContext.getDockerExecutionContext();
 
         String messageHeader = "Copy configuration file [" + initFile.getFileName() + "] to [" + containerName + "]:";
-        if (context.isVerbose()) {
-            System.out.println(messageHeader);
-            System.out.println(initFile.getContent());
-        }
+        Console.printlnVerbose(messageHeader);
+        Console.printlnVerbose(initFile.getContent());
         logger.debug(messageHeader);
         logger.debug(initFile.getContent());
 

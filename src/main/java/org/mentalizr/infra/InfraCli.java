@@ -4,7 +4,14 @@ import de.arthurpicht.cli.*;
 import de.arthurpicht.cli.command.Commands;
 import de.arthurpicht.cli.command.InfoDefaultCommand;
 import de.arthurpicht.cli.common.UnrecognizedArgumentException;
-import de.arthurpicht.cli.option.*;
+import de.arthurpicht.cli.option.ManOption;
+import de.arthurpicht.cli.option.OptionBuilder;
+import de.arthurpicht.cli.option.Options;
+import de.arthurpicht.cli.option.VersionOption;
+import de.arthurpicht.console.Console;
+import de.arthurpicht.console.config.ConsoleConfigurationBuilder;
+import de.arthurpicht.console.message.Level;
+import org.mentalizr.cli.ConsoleWriter;
 import org.mentalizr.infra.appInit.ApplicationContext;
 import org.mentalizr.infra.appInit.ApplicationInitialization;
 import org.mentalizr.infra.appInit.ApplicationInitializationException;
@@ -72,7 +79,11 @@ public class InfraCli {
                         .withShortName('n')
                         .withLongName("notify")
                         .withDescription("Send email notification to admins on command execution.")
-                        .build(GlobalOptions.GLOBAL_OPTION__NOTIFY));
+                        .build(GlobalOptions.GLOBAL_OPTION__NOTIFY))
+                .add(new OptionBuilder()
+                        .withLongName("no-color")
+                        .withDescription("no colors on console output.")
+                        .build(GlobalOptions.GLOBAL_OPTION__NO_COLOR));
 
         CliDescription cliDescription = new CliDescriptionBuilder()
                 .withDescription("mentalizr infra structure manager CLI\nhttps://github.com/mentalizr/m7r-infra")
@@ -99,22 +110,31 @@ public class InfraCli {
             System.exit(1);
         }
 
+        GlobalOptions globalOptions = new GlobalOptions(cliCall);
+
+        Console.configure(new ConsoleConfigurationBuilder()
+                .withMutedOutput(globalOptions.isSilent())
+                .withLevel(globalOptions.isVerbose() ? Level.VERBOSE : Level.NORMAL)
+                .withSuppressedColors(globalOptions.hasNoColor())
+                .build()
+        );
+
         try {
             ApplicationInitialization.execute(new GlobalOptions(cliCall));
         } catch (ApplicationInitializationException e) {
-            System.out.println(e.getMessage());
+            ConsoleWriter.error(e.getMessage());
             System.exit(1);
         }
 
         try {
             cli.execute(cliCall);
         } catch (CommandExecutorException e) {
-            System.out.println("m7r-infra execution failed.");
-            if (e.getMessage() != null) System.out.println(e.getMessage());
+            ConsoleWriter.error("m7r-infra execution failed.");
+            if (e.getMessage() != null) Console.println(e.getMessage());
             System.exit(1);
         } catch (RuntimeException e) {
-            System.out.println("RuntimeException: " + e.getMessage());
-            if (ApplicationContext.showStacktrace()) e.printStackTrace();
+            ConsoleWriter.error("RuntimeException: " + e.getMessage());
+            if (ApplicationContext.showStacktrace()) Console.printStackTrace(e);
             System.exit(1);
         }
     }

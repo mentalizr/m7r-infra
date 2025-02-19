@@ -26,7 +26,7 @@ public class WatchdogJob extends SchedulerJob implements Job {
 
         logger.debug("Starting job [" + watchdogConfiguration.getJobName() + "] ...");
 
-        ApplicationContext.initialize(new GlobalOptions(false, false, false, null, false));
+        ApplicationContext.initialize(new GlobalOptions(false, false, false, null, false, true));
         StatusSummary statusSummary = StatusSummary.create();
 
         if (statusSummary.isRunning()) {

@@ -6,25 +6,25 @@ import de.arthurpicht.processExecutor.ProcessExecutorBuilder;
 import de.arthurpicht.processExecutor.ProcessResultCollection;
 import de.arthurpicht.processExecutor.outputHandler.generalOutputHandler.GeneralStandardErrorHandler;
 import de.arthurpicht.processExecutor.outputHandler.generalOutputHandler.GeneralStandardOutHandler;
-import org.slf4j.Logger;
-import org.slf4j.event.Level;
 
 import java.io.InputStream;
 
 public class DockerProcessExecution {
 
-    public static ProcessResultCollection execute(Logger logger, boolean toConsole, String... commands)
+    public static ProcessResultCollection execute(
+            DockerExecutionContext dockerExecutionContext,
+            String... commands)
             throws ProcessExecutionException {
 
         GeneralStandardOutHandler standardOutHandler = new GeneralStandardOutHandler.Builder()
-                .withLogger(logger)
-                .withLogLevel(Level.DEBUG)
-                .withConsoleOutput(toConsole)
+                .withLogger(dockerExecutionContext.getLogger())
+                .withLogLevel(dockerExecutionContext.getLogLevelStdOut())
+                .withConsoleOutput(false)
                 .build();
         GeneralStandardErrorHandler standardErrorHandler = new GeneralStandardErrorHandler.Builder()
-                .withLogger(logger)
-                .withLogLevel(Level.DEBUG)
-                .withConsoleOutput(toConsole)
+                .withLogger(dockerExecutionContext.getLogger())
+                .withLogLevel(dockerExecutionContext.getLogLevelStdErr())
+                .withConsoleOutput(false)
                 .build();
         ProcessExecutor processExecutor = new ProcessExecutorBuilder()
                 .withCommands(commands)
@@ -35,18 +35,21 @@ public class DockerProcessExecution {
         return new ProcessResultCollection(processExecutor, standardOutHandler, standardErrorHandler);
     }
 
-    public static ProcessResultCollection execute(Logger logger, boolean toConsole, InputStream inputStream, String... commands)
+    public static ProcessResultCollection execute(
+            DockerExecutionContext dockerExecutionContext,
+            InputStream inputStream,
+            String... commands)
             throws ProcessExecutionException {
 
         GeneralStandardOutHandler standardOutHandler = new GeneralStandardOutHandler.Builder()
-                .withLogger(logger)
-                .withLogLevel(Level.DEBUG)
-                .withConsoleOutput(toConsole)
+                .withLogger(dockerExecutionContext.getLogger())
+                .withLogLevel(dockerExecutionContext.getLogLevelStdOut())
+                .withConsoleOutput(false)
                 .build();
         GeneralStandardErrorHandler standardErrorHandler = new GeneralStandardErrorHandler.Builder()
-                .withLogger(logger)
-                .withLogLevel(Level.DEBUG)
-                .withConsoleOutput(toConsole)
+                .withLogger(dockerExecutionContext.getLogger())
+                .withLogLevel(dockerExecutionContext.getLogLevelStdErr())
+                .withConsoleOutput(false)
                 .build();
         ProcessExecutor processExecutor = new ProcessExecutorBuilder()
                 .withCommands(commands)

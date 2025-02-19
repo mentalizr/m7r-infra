@@ -102,6 +102,7 @@ public class InfraTaskRegistry {
         taskRegistryBuilder.withTask(RemoveNetwork.create());
 
         taskRegistryBuilder
+                .withTask(IntentionUp.create())
                 .withTask(StartTarget.create())
                 .withTask(StartNginx.create())
                 .withTask(AwaitUpNginx.create())
@@ -117,6 +118,7 @@ public class InfraTaskRegistry {
                 .withTask(StartContainerMongo.create());
 
         taskRegistryBuilder
+                .withTask(IntentionDown.create())
                 .withTask(StopTarget.create())
                 .withTask(StopMongo.create())
                 .withTask(StopMaria.create())

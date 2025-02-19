@@ -6,6 +6,7 @@ import org.mentalizr.infra.GlobalOptions;
 import org.mentalizr.infra.Timeout;
 import org.mentalizr.infra.docker.DockerExecutionContext;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 
 import java.time.Instant;
 
@@ -25,8 +26,9 @@ public class ApplicationContext {
         timeout = getTimeout(globalOptions);
         ApplicationContext.globalOptions = globalOptions;
         dockerExecutionContext = new DockerExecutionContext.Builder()
-                .beVerbose(globalOptions.isVerbose())
                 .withLogger(LoggerFactory.getLogger(Const.DOCKER_LOGGER))
+                .withLogLevelStdOut(Level.DEBUG)
+                .withLogLevelStdErr(Level.ERROR)
                 .build();
         isInitialized = true;
     }

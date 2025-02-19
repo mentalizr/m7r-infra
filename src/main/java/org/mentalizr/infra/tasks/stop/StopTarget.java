@@ -10,7 +10,7 @@ public class StopTarget {
                 .asTarget()
                 .withName("stop")
                 .withDescription("stop docker infrastructure")
-                .withDependencies("stop-mongo")
+                .withDependencies("intention-down")
                 .execute(()-> {})
                 .build();
     }

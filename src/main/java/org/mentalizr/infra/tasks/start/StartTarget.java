@@ -10,7 +10,7 @@ public class StartTarget {
                 .asTarget()
                 .withName("start")
                 .withDescription("start docker infrastructure")
-                .withDependencies("start-nginx")
+                .withDependencies("intention-up")
                 .execute(()-> {})
                 .build();
     }

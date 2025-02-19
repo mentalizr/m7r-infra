@@ -7,8 +7,11 @@ import de.arthurpicht.taskRunner.TaskRunner;
 import de.arthurpicht.taskRunner.runner.TaskRunnerResult;
 import org.mentalizr.infra.tasks.InfraTaskRunner;
 import org.mentalizr.infra.tasks.scheduler.StopScheduler;
+import org.mentalizr.scheduler.processManagement.IntentionFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 @SuppressWarnings("StringConcatenationArgumentToLogCall")
 public class SchedulerStopExecutor implements CommandExecutor {

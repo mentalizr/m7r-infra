@@ -1,42 +1,55 @@
 package org.mentalizr.infra.docker;
 
 import org.slf4j.Logger;
+import org.slf4j.event.Level;
 
 public class DockerExecutionContext {
 
-    private final boolean verbose;
     private final Logger logger;
+    private final Level logLevelStdOut;
+    private final Level logLevelStdErr;
 
     public static class Builder {
-        private boolean verbose = false;
         private Logger logger = null;
-
-        public Builder beVerbose(boolean verbose) {
-            this.verbose = verbose;
-            return this;
-        }
+        private Level logLevelStdOut = Level.DEBUG;
+        private Level logLevelStdErr = Level.ERROR;
 
         public Builder withLogger(Logger logger) {
             this.logger = logger;
             return this;
         }
 
+        public Builder withLogLevelStdOut(Level logLevel) {
+            this.logLevelStdOut = logLevel;
+            return this;
+        }
+
+        public Builder withLogLevelStdErr(Level logLevel) {
+            this.logLevelStdErr = logLevel;
+            return this;
+        }
+
         public DockerExecutionContext build() {
-            return new DockerExecutionContext(this.verbose, this.logger);
+            return new DockerExecutionContext(this.logger, this.logLevelStdOut, this.logLevelStdErr);
         }
     }
 
-    private DockerExecutionContext(boolean verbose, Logger logger) {
-        this.verbose = verbose;
+    private DockerExecutionContext(Logger logger, Level logLevelStdOut, Level logLevelStdErr) {
         this.logger = logger;
-    }
-
-    public boolean isVerbose() {
-        return verbose;
+        this.logLevelStdOut = logLevelStdOut;
+        this.logLevelStdErr = logLevelStdErr;
     }
 
     public Logger getLogger() {
         return logger;
+    }
+
+    public Level getLogLevelStdOut() {
+        return logLevelStdOut;
+    }
+
+    public Level getLogLevelStdErr() {
+        return logLevelStdErr;
     }
 
 }

@@ -20,12 +20,15 @@ import org.mentalizr.infra.buildEntities.ports.PortTomcat;
 import org.mentalizr.infra.docker.m7r.*;
 import org.mentalizr.infra.scheduler.Scheduler;
 import org.mentalizr.infra.utils.LocalHost;
+import org.mentalizr.scheduler.processManagement.IntentionFile;
+import org.mentalizr.scheduler.processManagement.IntentionFile.Intention;
 
 public class StatusExecutor implements CommandExecutor {
 
     private static final int minLengthString = 44;
 
     private static final String UP = Ansi.colorize("UP", Attribute.GREEN_TEXT());
+    private static final String INTENTION_DOWN = Ansi.colorize("DOWN", Attribute.RED_TEXT());
     private static final String PRESENT = Ansi.colorize("PRESENT", Attribute.GREEN_TEXT());
     private static final String DOWN = Ansi.colorize("--", Attribute.RED_TEXT());
     private static final String RUNNING = Ansi.colorize("RUNNING", Attribute.GREEN_TEXT());
@@ -39,6 +42,7 @@ public class StatusExecutor implements CommandExecutor {
     private static final String DEACTIVATED = Ansi.colorize("DEACTIVATED", Attribute.RED_TEXT());
     private static final String UP_TO_DATE = Ansi.colorize("UP-TO-DATE", Attribute.GREEN_TEXT());
     private static final String CHANGED = Ansi.colorize("CHANGED", Attribute.RED_TEXT());
+    private static final String UNKNOWN = Ansi.colorize("UNKNOWN", Attribute.YELLOW_TEXT());
 
     @Override
     public void execute(CliCall cliCall) throws CommandExecutorException {
@@ -56,6 +60,16 @@ public class StatusExecutor implements CommandExecutor {
                     + "[" + GitReposDir.createInstance().toAbsolutePathString() + "].");
             System.out.println(Strings.rightPad("m7r content dir:", minLengthString)
                     + "[" + ContentDir.createInstance().toAbsolutePathString() + "].");
+        }
+
+        Intention intention = IntentionFile.getIntention();
+        String intentionString = Strings.fillUpRight("Intention: ", ' ', minLengthString);
+        if (intention == Intention.UP) {
+            System.out.println(intentionString + UP);
+        } else if (intention == Intention.DOWN) {
+            System.out.println(intentionString + INTENTION_DOWN);
+        } else if (intention == Intention.UNKNOWN) {
+            System.out.println(intentionString + UNKNOWN);
         }
 
         String networkString = Strings.fillUpRight("Network [" + Const.NETWORK + "]: ", ' ', minLengthString);

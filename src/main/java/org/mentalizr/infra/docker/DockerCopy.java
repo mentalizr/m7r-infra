@@ -44,8 +44,8 @@ public class DockerCopy {
         allCommandsForOutput.addAll(commands2);
         Docker.userOutput(context, allCommandsForOutput);
 
-        GeneralStandardOutHandler stdOutHandler = new GeneralStandardOutHandler(context.getLogger(), context.isVerbose());
-        GeneralStandardErrorHandler stdErrorHandler = new GeneralStandardErrorHandler(context.getLogger(), context.isVerbose());
+        GeneralStandardOutHandler stdOutHandler = new GeneralStandardOutHandler(context.getLogger(), false);
+        GeneralStandardErrorHandler stdErrorHandler = new GeneralStandardErrorHandler(context.getLogger(), false);
         ProcessExecutor processExecutor = new ProcessExecutorBuilder()
                 .withCommands("tar", "-cf", "-", "-C", parentDir, fileName, "--mode", "777", "--owner", "root", "--group", "root")
                 .withPipeToCommands("docker", "cp", "-", target)

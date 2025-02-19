@@ -10,12 +10,14 @@ public class GlobalOptions {
     public static final String GLOBAL_OPTION__SILENT = "silent";
     public static final String GLOBAL_OPTION__TIMEOUT = "timeout";
     public static final String GLOBAL_OPTION__NOTIFY = "notify";
+    public static final String GLOBAL_OPTION__NO_COLOR = "no-color";
 
     private final boolean verbose;
     private final boolean stacktrace;
     private final boolean silent;
     private final String timeout;
     private final boolean notify;
+    private final boolean noColor;
 
     public GlobalOptions(CliCall cliCall) {
         OptionParserResult optionParserResult = cliCall.getOptionParserResultGlobal();
@@ -28,14 +30,16 @@ public class GlobalOptions {
             this.timeout = null;
         }
         this.notify = optionParserResult.hasOption(GLOBAL_OPTION__NOTIFY);
+        this.noColor = optionParserResult.hasOption(GLOBAL_OPTION__NO_COLOR);
     }
 
-    public GlobalOptions(boolean verbose, boolean stacktrace, boolean silent, String timeout, boolean notify) {
+    public GlobalOptions(boolean verbose, boolean stacktrace, boolean silent, String timeout, boolean notify, boolean noColor) {
         this.verbose = verbose;
         this.stacktrace = stacktrace;
         this.silent = silent;
         this.timeout = timeout;
         this.notify = notify;
+        this.noColor = noColor;
     }
 
     public boolean isVerbose() {
@@ -61,6 +65,10 @@ public class GlobalOptions {
 
     public boolean isNotify() {
         return notify;
+    }
+
+    public boolean hasNoColor() {
+        return noColor;
     }
 
 }
