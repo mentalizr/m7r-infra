@@ -1,9 +1,7 @@
 package org.mentalizr.scheduler.configuration;
 
 import de.arthurpicht.utils.io.nio2.FileUtils;
-import org.mentalizr.commons.paths.host.hostDir.M7rSchedulerActiveFlagFile;
 import org.mentalizr.commons.paths.host.hostDir.M7rSchedulerConfigDir;
-import org.mentalizr.commons.paths.host.hostDir.M7rSchedulerConfigHashFile;
 import org.mentalizr.scheduler.M7rSchedulerException;
 import org.mentalizr.scheduler.M7rSchedulerInitializationException;
 import org.mentalizr.scheduler.helper.Checksums;
@@ -87,8 +85,9 @@ public class JobConfigurationsManager {
 
         try {
             List<Path> containingFiles = FileHelper.getRegularFilesNotEndingWithTildeInDirectory(configDir);
-            containingFiles.remove(new M7rSchedulerActiveFlagFile().asPath());
-            containingFiles.remove(new M7rSchedulerConfigHashFile().asPath());
+            // TODO ...
+//            containingFiles.remove(new M7rSchedulerActiveFlagFile().asPath());
+//            containingFiles.remove(new M7rSchedulerConfigHashFile().asPath());
             return containingFiles;
 
         } catch (IOException e) {

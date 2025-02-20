@@ -2,7 +2,7 @@ package org.mentalizr.scheduler.configuration;
 
 import de.arthurpicht.utils.io.file.SingleValueFile;
 import de.arthurpicht.utils.io.nio2.FileUtils;
-import org.mentalizr.commons.paths.host.hostDir.M7rSchedulerActiveFlagFile;
+import org.mentalizr.scheduler.m7rPaths.M7rSchedulerActiveFlagFile;
 
 import java.io.IOException;
 import java.nio.file.Files;

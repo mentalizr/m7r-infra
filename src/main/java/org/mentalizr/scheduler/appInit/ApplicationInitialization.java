@@ -32,18 +32,18 @@ public class ApplicationInitialization {
     private static void initLogging() {
         M7rHostLogDir m7rHostLogDir = new M7rHostLogDir();
         Path logFile = m7rHostLogDir.asPath().resolve("m7r-scheduler.log");
-        LoggerInit.consoleAndFile(logFile, Level.INFO, Level.OFF);
+        LoggerInit.consoleAndFile(logFile, Level.DEBUG, Level.OFF);
     }
 
     private static void createDaemonConfigDir() {
-        M7rSchedulerConfigDir m7rDaemonConfigDir = new M7rSchedulerConfigDir();
-        if (!m7rDaemonConfigDir.exists()) {
+        M7rSchedulerConfigDir m7rSchedulerConfigDir = new M7rSchedulerConfigDir();
+        if (!m7rSchedulerConfigDir.exists()) {
             try {
-                m7rDaemonConfigDir.create();
+                m7rSchedulerConfigDir.create();
             } catch (IOException e) {
                 throw new ApplicationInitializationException(
                         "Application initialization failed. Could not create directory ["
-                                + m7rDaemonConfigDir.toAbsolutePathString() + "]");
+                                + m7rSchedulerConfigDir.toAbsolutePathString() + "]");
             }
         }
     }

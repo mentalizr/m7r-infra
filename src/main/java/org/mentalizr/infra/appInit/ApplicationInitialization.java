@@ -75,7 +75,7 @@ public class ApplicationInitialization {
     private static void initLogging() {
         M7rHostLogDir m7rHostLogDir = new M7rHostLogDir();
         Path logFile = m7rHostLogDir.asPath().resolve("m7r-infra.log");
-        LoggerInit.consoleAndFile(logFile, Level.DEBUG, Level.OFF);
+        LoggerInit.consoleAndFile(logFile, Level.INFO, Level.OFF);
     }
 
 }

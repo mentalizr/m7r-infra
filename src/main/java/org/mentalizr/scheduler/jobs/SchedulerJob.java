@@ -1,9 +1,7 @@
 package org.mentalizr.scheduler.jobs;
 
-import org.mentalizer.mailer.notifier.MailNotifier;
-import org.mentalizr.scheduler.mailNotifier.SchedulerMailNotifierCallback;
-import org.mentalizr.scheduler.helper.ExceptionUtils;
-import org.mentalizr.scheduler.helper.LocalHost;
+import de.arthurpicht.utils.core.exception.ExceptionUtils;
+import de.arthurpicht.utils.core.system.SystemUtils;
 import org.mentalizr.scheduler.mailNotifier.SchedulerMailNotifier;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -39,6 +37,7 @@ public abstract class SchedulerJob implements Job {
         }
         try {
             schedulerExecute(jobExecutionContext, jobConfigurationJson);
+            logger.info("Finished executing job [" + jobConfiguration.getJobName() + "]");
             if (jobConfiguration.getBaseConfiguration().isNotifyOnSuccess())
                 sendNotificationOnSuccess(jobConfiguration);
         } catch (JobExecutionException | RuntimeException e) {
@@ -58,7 +57,7 @@ public abstract class SchedulerJob implements Job {
     }
 
     private void sendNotificationOnSuccess(JobConfiguration jobConfiguration) {
-        String hostname = LocalHost.getHostname();
+        String hostname = SystemUtils.getHostname();
         SchedulerMailNotifier.send(
                 "[" + hostname + "] Scheduler job executed: [" + jobConfiguration.getJobName() + "].",
                 "Successfully executed job [" + jobConfiguration.getJobName() + "] on [" + hostname + "].\n\n"
@@ -67,7 +66,7 @@ public abstract class SchedulerJob implements Job {
     }
 
     private void sendNotificationOnFailure(JobConfiguration jobConfiguration, Exception e) {
-        String hostname = LocalHost.getHostname();
+        String hostname = SystemUtils.getHostname();
         String stacktrace = ExceptionUtils.getStackTrace(e);
         SchedulerMailNotifier.send(
                 "[" + hostname + "] Scheduler job execution FAILED for [" + jobConfiguration.getJobName() + "].",
