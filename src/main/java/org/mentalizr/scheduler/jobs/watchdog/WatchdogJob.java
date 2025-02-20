@@ -6,6 +6,8 @@ import org.mentalizr.infra.appInit.ApplicationContext;
 import org.mentalizr.infra.executors.Restart;
 import org.mentalizr.infra.externalApi.StatusSummary;
 import org.mentalizr.scheduler.jobs.SchedulerJob;
+import org.mentalizr.scheduler.processManagement.IntentionFile;
+import org.mentalizr.scheduler.processManagement.IntentionFile.Intention;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -26,13 +28,18 @@ public class WatchdogJob extends SchedulerJob implements Job {
 
         logger.debug("Starting job [" + watchdogConfiguration.getJobName() + "] ...");
 
+        Intention intention = IntentionFile.getIntention();
+        if (intention != Intention.UP) {
+            logger.debug("Intention is [" + intention + "]. Watchdog continues to sleep.");
+        }
+
         ApplicationContext.initialize(new GlobalOptions(false, false, false, null, false, true));
         StatusSummary statusSummary = StatusSummary.create();
 
         if (statusSummary.isRunning()) {
-            logger.debug("m7r infrastructure is running.");
+            logger.debug("Intention is UP and m7r infrastructure is running. Watchdog continues to sleep.");
         } else {
-            logger.warn("m7r infrastructure not running. Try to restart ...");
+            logger.warn("Intention is UP and m7r infrastructure is not running. Try to restart ...");
             try {
                 Restart.perform();
                 logger.warn("m7r infrastructure restarted.");

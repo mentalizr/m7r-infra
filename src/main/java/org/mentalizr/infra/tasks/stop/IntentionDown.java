@@ -10,7 +10,6 @@ public class IntentionDown {
         return new TaskBuilder()
                 .withName("intention-down")
                 .withDescription("set intention as down")
-                .withDependencies("stop-mongo")
                 .execute(IntentionFile::createDown)
                 .build();
     }

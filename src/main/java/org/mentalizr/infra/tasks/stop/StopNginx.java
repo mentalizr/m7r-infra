@@ -10,6 +10,7 @@ public class StopNginx {
         return new TaskBuilder()
                 .withName("stop-nginx")
                 .withDescription("stop nginx")
+                .withDependencies("intention-down")
                 .execute(M7rContainerNginx::stop)
                 .build();
     }

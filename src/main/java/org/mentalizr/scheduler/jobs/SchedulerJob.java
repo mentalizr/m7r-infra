@@ -1,9 +1,10 @@
 package org.mentalizr.scheduler.jobs;
 
 import org.mentalizer.mailer.notifier.MailNotifier;
-import org.mentalizr.scheduler.SchedulerMailNotifierCallback;
+import org.mentalizr.scheduler.mailNotifier.SchedulerMailNotifierCallback;
 import org.mentalizr.scheduler.helper.ExceptionUtils;
 import org.mentalizr.scheduler.helper.LocalHost;
+import org.mentalizr.scheduler.mailNotifier.SchedulerMailNotifier;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -57,27 +58,23 @@ public abstract class SchedulerJob implements Job {
     }
 
     private void sendNotificationOnSuccess(JobConfiguration jobConfiguration) {
-        SchedulerMailNotifierCallback callback = new SchedulerMailNotifierCallback();
         String hostname = LocalHost.getHostname();
-        MailNotifier.sendNotification(
+        SchedulerMailNotifier.send(
                 "[" + hostname + "] Scheduler job executed: [" + jobConfiguration.getJobName() + "].",
                 "Successfully executed job [" + jobConfiguration.getJobName() + "] on [" + hostname + "].\n\n"
-                + "This is a automatically generated notification. Please do not reply.",
-                callback
+                + "This is a automatically generated notification. Please do not reply."
         );
     }
 
     private void sendNotificationOnFailure(JobConfiguration jobConfiguration, Exception e) {
-        SchedulerMailNotifierCallback callback = new SchedulerMailNotifierCallback();
         String hostname = LocalHost.getHostname();
         String stacktrace = ExceptionUtils.getStackTrace(e);
-        MailNotifier.sendNotification(
+        SchedulerMailNotifier.send(
                 "[" + hostname + "] Scheduler job execution FAILED for [" + jobConfiguration.getJobName() + "].",
                 "Execution of job [" + jobConfiguration.getJobName() + "] on [" + hostname + "] failed.\n\n"
                         + "Exception message: " + e.getMessage() + "\n\n"
                         + stacktrace + "\n\n"
-                        + "This is a automatically generated notification. Please do not reply.",
-                callback
+                        + "This is a automatically generated notification. Please do not reply."
         );
     }
 

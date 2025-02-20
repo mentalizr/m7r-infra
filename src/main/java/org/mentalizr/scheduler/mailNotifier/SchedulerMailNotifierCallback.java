@@ -1,4 +1,4 @@
-package org.mentalizr.scheduler;
+package org.mentalizr.scheduler.mailNotifier;
 
 import org.mentalizer.mailer.notifier.MailNotifierCallback;
 import org.mentalizer.mailer.notifier.MailNotifierResult;
