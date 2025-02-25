@@ -33,6 +33,17 @@ public class ApplicationContext {
         isInitialized = true;
     }
 
+    public static void initializeWithDefaults() {
+        GlobalOptions globalOptions = new GlobalOptions(
+                false,
+                false,
+                false,
+                null,
+                false,
+                true);
+        initialize(globalOptions);
+    }
+
     public static Instant getCallTimestamp() {
         assertIsInitialized();
         return callTimestamp;

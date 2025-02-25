@@ -25,12 +25,12 @@ public abstract class SchedulerJob implements Job {
 
     @Override
     public final void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        if (JobHelper.isInactive()) {
-            logger.info("Scheduler is configured as deactivated. Skipping execution.");
-            return;
-        }
         String jobConfigurationJson = getJobConfigurationAsJson(jobExecutionContext);
         JobConfiguration jobConfiguration = getJobConfiguration(jobConfigurationJson);
+        if (JobHelper.isInactive()) {
+            logger.info("Scheduler is deactivated. Skipping execution of job [" + jobConfiguration.getJobName() + "].");
+            return;
+        }
         if (!jobConfiguration.baseConfiguration.isEnabled()) {
             logger.info("Job [" + jobConfiguration.getJobName() + "] is configured as disabled. Skipping execution.");
             return;

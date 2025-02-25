@@ -1,9 +1,14 @@
 package org.mentalizr.scheduler.appInit;
 
 import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
 import de.arthurpicht.utils.logging.LoggerInit;
 import org.mentalizr.commons.paths.host.hostDir.M7rHostLogDir;
 import org.mentalizr.commons.paths.host.hostDir.M7rSchedulerConfigDir;
+import org.mentalizr.scheduler.configuration.SchedulerConfig;
+import org.mentalizr.scheduler.configuration.SchedulerConfigLoader;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -14,6 +19,10 @@ public class ApplicationInitialization {
         createLogDir();
         initLogging();
         createDaemonConfigDir();
+    }
+
+    private static SchedulerConfig loadSchedulerConfig() {
+        return SchedulerConfigLoader.load();
     }
 
     private static void createLogDir() throws ApplicationInitializationException {
@@ -33,6 +42,12 @@ public class ApplicationInitialization {
         M7rHostLogDir m7rHostLogDir = new M7rHostLogDir();
         Path logFile = m7rHostLogDir.asPath().resolve("m7r-scheduler.log");
         LoggerInit.consoleAndFile(logFile, Level.DEBUG, Level.OFF);
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        Logger mongoLogger = loggerContext.getLogger("org.mongo");
+        mongoLogger.setLevel(Level.INFO);
+        Logger quartzLogger = loggerContext.getLogger("org.quartz");
+        quartzLogger.setLevel(Level.INFO);
+
     }
 
     private static void createDaemonConfigDir() {

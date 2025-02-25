@@ -15,7 +15,12 @@ public record StatusSummary(
         boolean nginxPortOpen) {
 
     public boolean isRunning() {
-        return InfraLogicHelper.allTrue(networkUp, mongoClientConnection, mariaDBClientConnection, tomcatM7rService, nginxPortOpen);
+        return InfraLogicHelper.allTrue(
+                networkUp,
+                mongoClientConnection,
+                mariaDBClientConnection,
+                tomcatM7rService,
+                nginxPortOpen);
     }
 
     public static StatusSummary create() {
@@ -25,7 +30,12 @@ public record StatusSummary(
         boolean tomcatM7rService = ConnectionTomcat.probe();
         boolean nginxPortOpen = PortTomcat.isListening();
 
-        return new StatusSummary(networkUp, mongoClientConnection, mariaDBClientConnection, tomcatM7rService, nginxPortOpen);
+        return new StatusSummary(
+                networkUp,
+                mongoClientConnection,
+                mariaDBClientConnection,
+                tomcatM7rService,
+                nginxPortOpen);
     }
 
 }

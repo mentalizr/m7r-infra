@@ -5,7 +5,6 @@ import de.arthurpicht.utils.core.exception.ExceptionUtils;
 import de.arthurpicht.utils.core.system.SystemUtils;
 import org.mentalizer.mailer.notifier.MailNotification;
 import org.mentalizer.mailer.notifier.MailNotifier;
-import org.mentalizr.infra.GlobalOptions;
 import org.mentalizr.infra.appInit.ApplicationContext;
 import org.mentalizr.infra.executors.Restart;
 import org.mentalizr.infra.externalApi.StatusSummary;
@@ -39,7 +38,7 @@ public class WatchdogJob extends SchedulerJob implements Job {
             return;
         }
 
-        ApplicationContext.initialize(new GlobalOptions(false, false, false, null, false, true));
+        ApplicationContext.initializeWithDefaults();
         StatusSummary statusSummary = StatusSummary.create();
 
         if (statusSummary.isRunning()) {

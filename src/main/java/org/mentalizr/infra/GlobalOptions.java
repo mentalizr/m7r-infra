@@ -63,6 +63,9 @@ public class GlobalOptions {
         return timeout;
     }
 
+    /**
+     * Send email notifications on execution of selected commands.
+     */
     public boolean isNotify() {
         return notify;
     }

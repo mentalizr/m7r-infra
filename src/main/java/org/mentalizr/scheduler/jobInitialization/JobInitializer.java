@@ -27,8 +27,6 @@ public class JobInitializer {
             JobConfiguration jobConfiguration
             ) throws SchedulerException {
 
-        logger.info("scheduling job: " + jobConfiguration.getJobName());
-
         String name = jobConfiguration.getJobName();
         String triggerName = jobConfiguration.getTriggerName();
         String cronSchedule = jobConfiguration.getCronSchedule();
@@ -36,7 +34,7 @@ public class JobInitializer {
         String jobJson = new Gson().toJson(jobConfiguration);
 
         logger.info("Scheduling job [{}] of type [{}].", name, jobTypeName);
-        logger.info("With job configuration: {}", jobJson);
+        logger.debug("with job configuration: {}", jobJson);
 
         JobDetail job = JobBuilder.newJob(SchedulerJobFactory.getJobClass(jobConfiguration))
                 .withIdentity(name, jobTypeName)
