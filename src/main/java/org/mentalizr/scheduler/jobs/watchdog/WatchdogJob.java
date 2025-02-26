@@ -38,7 +38,7 @@ public class WatchdogJob extends SchedulerJob implements Job {
             return;
         }
 
-        ApplicationContext.initializeWithDefaults();
+//        ApplicationContext.initializeWithDefaults();
         StatusSummary statusSummary = StatusSummary.create();
 
         if (statusSummary.isRunning()) {

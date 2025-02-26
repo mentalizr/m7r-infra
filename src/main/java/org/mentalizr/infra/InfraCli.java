@@ -13,8 +13,8 @@ import de.arthurpicht.console.config.ConsoleConfigurationBuilder;
 import de.arthurpicht.console.message.Level;
 import org.mentalizr.cli.ConsoleWriter;
 import org.mentalizr.infra.appInit.ApplicationContext;
-import org.mentalizr.infra.appInit.ApplicationInitialization;
-import org.mentalizr.infra.appInit.ApplicationInitializationException;
+import org.mentalizr.infra.appInit.InfraApplicationInitialization;
+import org.mentalizr.infra.appInit.InfraApplicationInitializationException;
 import org.mentalizr.infra.executors.*;
 
 public class InfraCli {
@@ -120,8 +120,8 @@ public class InfraCli {
         );
 
         try {
-            ApplicationInitialization.execute(new GlobalOptions(cliCall));
-        } catch (ApplicationInitializationException e) {
+            InfraApplicationInitialization.execute(new GlobalOptions(cliCall));
+        } catch (InfraApplicationInitializationException e) {
             ConsoleWriter.error(e.getMessage());
             System.exit(1);
         }

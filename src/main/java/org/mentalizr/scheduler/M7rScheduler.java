@@ -4,11 +4,10 @@ import de.arthurpicht.utils.core.exception.ExceptionUtils;
 import de.arthurpicht.utils.core.system.SystemUtils;
 import org.mentalizer.mailer.notifier.MailNotification;
 import org.mentalizer.mailer.notifier.MailNotifier;
-import org.mentalizr.infra.appInit.ApplicationContext;
+import org.mentalizr.infra.appInit.InfraApplicationInitialization;
+import org.mentalizr.infra.appInit.InfraApplicationInitializationException;
 import org.mentalizr.infra.executors.Restart;
 import org.mentalizr.infra.externalApi.StatusSummary;
-import org.mentalizr.scheduler.appInit.ApplicationInitialization;
-import org.mentalizr.scheduler.appInit.ApplicationInitializationException;
 import org.mentalizr.scheduler.configuration.JobConfigurations;
 import org.mentalizr.scheduler.configuration.JobConfigurationsManager;
 import org.mentalizr.scheduler.configuration.SchedulerConfig;
@@ -32,8 +31,8 @@ public class M7rScheduler {
     public static void main(String[] args) {
 
         try {
-            ApplicationInitialization.execute();
-        } catch (ApplicationInitializationException e) {
+            InfraApplicationInitialization.executeWithDefaults();
+        } catch (InfraApplicationInitializationException e) {
             logger.error(e.getMessage(), e);
             System.exit(1);
         }
@@ -56,7 +55,6 @@ public class M7rScheduler {
             SchedulerConfig schedulerConfig = SchedulerConfigLoader.load();
             if (schedulerConfig.isInfraAutostart()) {
                 logger.info("auto-starting infrastructure ...");
-                ApplicationContext.initializeWithDefaults();
                 StatusSummary statusSummary = StatusSummary.create();
                 if (statusSummary.isRunning()) {
                     logger.info("Infrastructure is already running.");

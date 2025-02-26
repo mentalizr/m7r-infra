@@ -33,6 +33,7 @@ public class ApplicationContext {
         isInitialized = true;
     }
 
+    @Deprecated
     public static void initializeWithDefaults() {
         GlobalOptions globalOptions = new GlobalOptions(
                 false,
