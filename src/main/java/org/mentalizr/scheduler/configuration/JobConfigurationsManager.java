@@ -2,8 +2,7 @@ package org.mentalizr.scheduler.configuration;
 
 import de.arthurpicht.utils.io.nio2.FileUtils;
 import org.mentalizr.commons.paths.host.hostDir.M7rSchedulerConfigDir;
-import org.mentalizr.scheduler.M7rSchedulerException;
-import org.mentalizr.scheduler.M7rSchedulerInitializationException;
+import org.mentalizr.scheduler.SchedulerRuntimeException;
 import org.mentalizr.scheduler.helper.Checksums;
 import org.mentalizr.scheduler.helper.FileHelper;
 import org.mentalizr.scheduler.jobFactories.JobConfigurationFactory;
@@ -54,12 +53,8 @@ public class JobConfigurationsManager {
         saveHashToFile(configurationFiles);
     }
 
-    public static boolean hasConsistentConfiguration() {
+    public static boolean hasUnmodifiedConfiguration() {
         Path schedulerConfigDir = new M7rSchedulerConfigDir().asPath();
-        return hasConsistentConfiguration(schedulerConfigDir);
-    }
-
-    public static boolean hasConsistentConfiguration(Path schedulerConfigDir) {
         if (!SchedulerConfigHashFile.exists())
             return false;
         List<Path> configurationFiles = scanSchedulerConfigDir(schedulerConfigDir);
@@ -67,31 +62,26 @@ public class JobConfigurationsManager {
         try {
             currentHash = Checksums.computeSha256Checksum(configurationFiles);
         } catch (NoSuchAlgorithmException | IOException e) {
-            throw new M7rSchedulerException("Error computing config hash: " + e.getMessage(), e);
+            throw new SchedulerRuntimeException("Error computing config hash: " + e.getMessage(), e);
         }
         String savedHash;
         try {
             savedHash = SchedulerConfigHashFile.read();
         } catch (IOException e) {
-            throw new M7rSchedulerException("Error reading scheduler config hash file: " + e.getMessage(), e);
+            throw new SchedulerRuntimeException("Error reading scheduler config hash file: " + e.getMessage(), e);
         }
         return currentHash.equals(savedHash);
     }
 
     private static List<Path> scanSchedulerConfigDir(Path configDir) {
         if (!FileUtils.isExistingDirectory(configDir))
-            throw new M7rSchedulerInitializationException("The config directory does not exist: " +
+            throw new JobConfigurationException("The config directory does not exist: " +
                     "[" + configDir.toAbsolutePath() + "].");
 
         try {
-            List<Path> containingFiles = FileHelper.getRegularFilesNotEndingWithTildeInDirectory(configDir);
-            // TODO ...
-//            containingFiles.remove(new M7rSchedulerActiveFlagFile().asPath());
-//            containingFiles.remove(new M7rSchedulerConfigHashFile().asPath());
-            return containingFiles;
-
+            return FileHelper.getRegularFilesNotEndingWithTildeInDirectory(configDir);
         } catch (IOException e) {
-            throw new M7rSchedulerException("Could not scan directory: [" + configDir.toAbsolutePath() + "].", e);
+            throw new SchedulerRuntimeException("Could not scan directory: [" + configDir.toAbsolutePath() + "].", e);
         }
     }
 
@@ -100,7 +90,7 @@ public class JobConfigurationsManager {
             String hash = Checksums.computeSha256Checksum(configurationFiles);
             SchedulerConfigHashFile.write(hash);
         } catch (NoSuchAlgorithmException | IOException e) {
-            throw new M7rSchedulerException("Error on saving scheduler configuration hash file: " + e.getMessage(), e);
+            throw new SchedulerRuntimeException("Error on saving scheduler configuration hash file: " + e.getMessage(), e);
         }
     }
 

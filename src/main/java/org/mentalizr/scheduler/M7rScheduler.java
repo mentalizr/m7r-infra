@@ -10,8 +10,8 @@ import org.mentalizr.infra.executors.Restart;
 import org.mentalizr.infra.externalApi.StatusSummary;
 import org.mentalizr.scheduler.configuration.JobConfigurations;
 import org.mentalizr.scheduler.configuration.JobConfigurationsManager;
-import org.mentalizr.scheduler.configuration.SchedulerConfig;
-import org.mentalizr.scheduler.configuration.SchedulerConfigLoader;
+import org.mentalizr.scheduler.configuration.infra.InfraConfig;
+import org.mentalizr.scheduler.configuration.infra.InfraConfigLoader;
 import org.mentalizr.scheduler.helper.LinuxHelper;
 import org.mentalizr.scheduler.jobInitialization.JobInitializer;
 import org.mentalizr.scheduler.mailNotifier.SchedulerMailNotifierCallback;
@@ -31,8 +31,8 @@ public class M7rScheduler {
     public static void main(String[] args) {
 
         try {
-            InfraApplicationInitialization.executeWithDefaults();
-        } catch (InfraApplicationInitializationException e) {
+            InfraApplicationInitialization.asScheduler();
+        } catch (InfraApplicationInitializationException | SchedulerRuntimeException e) {
             logger.error(e.getMessage(), e);
             System.exit(1);
         }
@@ -52,15 +52,15 @@ public class M7rScheduler {
         }
 
         try {
-            SchedulerConfig schedulerConfig = SchedulerConfigLoader.load();
-            if (schedulerConfig.isInfraAutostart()) {
+            InfraConfig infraConfig = InfraConfigLoader.load();
+            if (infraConfig.isInfraAutostart()) {
                 logger.info("auto-starting infrastructure ...");
                 StatusSummary statusSummary = StatusSummary.create();
                 if (statusSummary.isRunning()) {
-                    logger.info("Infrastructure is already running.");
+                    logger.info("Infrastructure is already running. No autostart performed.");
                 } else {
                     Restart.perform();
-                    logger.warn("m7r infrastructure restarted.");
+                    logger.warn("Infrastructure successfully started by autostart.");
                     sendNotificationAutostart();
                 }
             }

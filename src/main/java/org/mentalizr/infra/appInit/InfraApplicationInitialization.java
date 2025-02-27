@@ -11,13 +11,33 @@ import org.mentalizr.commons.paths.M7rFile;
 import org.mentalizr.commons.paths.client.M7rClientCliConfigFile;
 import org.mentalizr.commons.paths.client.M7rClientCredentialsFile;
 import org.mentalizr.commons.paths.host.hostDir.*;
+import org.mentalizr.infra.Const;
 import org.mentalizr.infra.GlobalOptions;
+import org.mentalizr.scheduler.configuration.infra.InfraConfig;
+import org.mentalizr.scheduler.configuration.infra.InfraConfigLoader;
 
 import java.io.IOException;
 
 public class InfraApplicationInitialization {
 
-    public static void execute(GlobalOptions globalOptions) throws InfraApplicationInitializationException {
+    public enum Application { CLI, SCHEDULER }
+
+    public static void asCli(GlobalOptions globalOptions) throws InfraApplicationInitializationException {
+        execute(globalOptions, Application.CLI);
+    }
+
+    public static void asScheduler() throws InfraApplicationInitializationException {
+        GlobalOptions globalOptions = new GlobalOptions(
+                false,
+                false,
+                false,
+                null,
+                false,
+                true);
+        execute(globalOptions, Application.SCHEDULER);
+    }
+
+    private static void execute(GlobalOptions globalOptions, Application application) throws InfraApplicationInitializationException {
         assertExistsM7rFile(new M7rInfraUserConfigFile());
         assertExistsM7rFile(new M7rSslCertFile());
         assertExistsM7rFile(new M7rPrivateKeyFile());
@@ -30,19 +50,11 @@ public class InfraApplicationInitialization {
 
         createLogDir();
         createDaemonConfigDir();
-        configureLogging();
-        ApplicationContext.initialize(globalOptions);
-    }
+        InfraConfig infraConfig = InfraConfigLoader.load();
 
-    public static void executeWithDefaults() throws InfraApplicationInitializationException {
-        GlobalOptions globalOptions = new GlobalOptions(
-                false,
-                false,
-                false,
-                null,
-                false,
-                true);
-        execute(globalOptions);
+        Logging.configure(infraConfig, application);
+
+        ApplicationContext.initialize(globalOptions);
     }
 
     private static void assertExistsM7rDir(M7rDir m7rDir) throws InfraApplicationInitializationException {
@@ -94,20 +106,21 @@ public class InfraApplicationInitialization {
         }
     }
 
-    private static void configureLogging() {
+    private static void configureLogging(InfraConfig infraConfig) {
         M7rHostLogDir m7rHostLogDir = new M7rHostLogDir();
         new LogbackInit()
                 .addLogFile(new LogFile.Builder()
                         .withPath(m7rHostLogDir.asPath().resolve("m7r-infra.log"))
-                        .withLevel(Level.INFO)
+                        .withLevel(infraConfig.getLogLevelInfra())
                         .build())
                 .addLogFile(new LogFile.Builder()
                         .withPath(new M7rHostLogDir().asPath().resolve("m7r-scheduler.log"))
                         .withLogger("org.mentalizr.scheduler")
-                        .withLevel(Level.DEBUG)
+                        .withLevel(infraConfig.getLogLevelScheduler())
                         .build())
                 .addLoggerLevel("org.mongo", Level.INFO)
                 .addLoggerLevel("org.quartz", Level.INFO)
+                .addLoggerLevel(Const.DOCKER_LOGGER, infraConfig.getLogLevelDocker())
                 .initialize();
     }
 

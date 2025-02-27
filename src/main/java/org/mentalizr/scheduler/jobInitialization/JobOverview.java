@@ -1,7 +1,7 @@
 package org.mentalizr.scheduler.jobInitialization;
 
 import de.arthurpicht.utils.core.dates.ISODates;
-import org.mentalizr.scheduler.M7rSchedulerException;
+import org.mentalizr.scheduler.SchedulerRuntimeException;
 import org.mentalizr.scheduler.configuration.JobConfigurations;
 import org.mentalizr.scheduler.jobs.JobConfiguration;
 import org.quartz.CronExpression;
@@ -40,7 +40,7 @@ public class JobOverview {
             Date nextExecutionDate = cronExpression.getNextValidTimeAfter(Date.from(Instant.now()));
             return ISODates.toIsoString(nextExecutionDate);
         } catch (ParseException e) {
-            throw new M7rSchedulerException(e.getMessage(), e);
+            throw new SchedulerRuntimeException(e.getMessage(), e);
         }
     }
 

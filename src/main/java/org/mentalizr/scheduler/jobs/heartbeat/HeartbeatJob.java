@@ -1,6 +1,7 @@
 package org.mentalizr.scheduler.jobs.heartbeat;
 
 import com.google.gson.Gson;
+import de.arthurpicht.utils.logging.LogbackConfigStatus;
 import org.mentalizr.scheduler.jobs.SchedulerJob;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;

@@ -16,6 +16,7 @@ import org.mentalizr.infra.appInit.ApplicationContext;
 import org.mentalizr.infra.appInit.InfraApplicationInitialization;
 import org.mentalizr.infra.appInit.InfraApplicationInitializationException;
 import org.mentalizr.infra.executors.*;
+import org.mentalizr.scheduler.SchedulerRuntimeException;
 
 public class InfraCli {
 
@@ -120,9 +121,12 @@ public class InfraCli {
         );
 
         try {
-            InfraApplicationInitialization.execute(new GlobalOptions(cliCall));
-        } catch (InfraApplicationInitializationException e) {
+            InfraApplicationInitialization.asCli(new GlobalOptions(cliCall));
+        } catch (InfraApplicationInitializationException | SchedulerRuntimeException e) {
             ConsoleWriter.error(e.getMessage());
+            if (globalOptions.showStacktrace()) {
+                Console.printStackTrace(e);
+            }
             System.exit(1);
         }
 

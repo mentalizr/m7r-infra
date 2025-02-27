@@ -1,9 +1,14 @@
 package org.mentalizr.scheduler.helper;
 
+import ch.qos.logback.classic.Level;
 import de.arthurpicht.configuration.Configuration;
+import de.arthurpicht.configuration.ConfigurationFactory;
+import de.arthurpicht.configuration.ConfigurationFileNotFoundException;
 import de.arthurpicht.utils.core.strings.Strings;
-import org.mentalizr.scheduler.M7rSchedulerConfigurationException;
+import org.mentalizr.commons.paths.M7rFile;
+import org.mentalizr.scheduler.SchedulerRuntimeException;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Set;
 
@@ -24,7 +29,7 @@ public class ConfigurationHelper {
                 } else {
                     message += ".";
                 }
-                throw new M7rSchedulerConfigurationException(message);
+                throw new SchedulerRuntimeException(message);
             }
         }
     }
@@ -44,9 +49,53 @@ public class ConfigurationHelper {
                 } else {
                     message += ".";
                 }
-                throw new M7rSchedulerConfigurationException(message);
+                throw new SchedulerRuntimeException(message);
             }
         }
     }
 
+    public static ConfigurationFactory bindConfigFile(M7rFile m7rConfigFile) {
+        return bindConfigFile(m7rConfigFile.asPath());
+    }
+
+    public static ConfigurationFactory bindConfigFile(Path configurationFile) {
+        ConfigurationFactory configurationFactory = new ConfigurationFactory();
+        try {
+            configurationFactory.addConfigurationFileFromFilesystem(configurationFile.toFile());
+        } catch (ConfigurationFileNotFoundException | IOException e) {
+            throw new SchedulerRuntimeException("Error reading configuration file ["
+                    + configurationFile.toAbsolutePath() + "]: " + e.getMessage(), e);
+        }
+        return configurationFactory;
+    }
+
+    public static boolean getMandatoryBoolean(Configuration configuration, String name, M7rFile m7rFile) {
+        if (!configuration.containsKey(name))
+            throw new SchedulerRuntimeException(
+                    "Mandatory configuration parameter [" + name + "] not found in ["
+                            + m7rFile.asPath().toAbsolutePath() + "].");
+        return configuration.getBoolean(name);
+    }
+
+    public static int getMandatoryInt(Configuration configuration, String name, M7rFile m7rFile) {
+        if (!configuration.containsKey(name))
+            throw new SchedulerRuntimeException(
+                    "Mandatory configuration parameter [" + name + "] not found in ["
+                            + m7rFile.asPath().toAbsolutePath() + "].");
+        return configuration.getInt(name);
+    }
+
+    public static Level getLevel(Configuration configuration, String parameterName, Level defaultLevel, M7rFile m7rFile) {
+        if (!configuration.containsKey(parameterName))
+            return defaultLevel;
+        String value = configuration.getString(parameterName).toUpperCase();
+        try {
+            return Level.valueOf(value);
+        } catch (IllegalArgumentException e) {
+            throw new SchedulerRuntimeException(
+                    "Configuration parameter [" + parameterName + "] with illegal value: [" + value + "] in ["
+                            + m7rFile.asPath().toAbsolutePath() + "]."
+            );
+        }
+    }
 }

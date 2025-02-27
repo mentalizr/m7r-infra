@@ -20,10 +20,15 @@ import org.mentalizr.infra.buildEntities.ports.PortTomcat;
 import org.mentalizr.infra.docker.m7r.*;
 import org.mentalizr.infra.scheduler.Scheduler;
 import org.mentalizr.infra.utils.LocalHost;
+import org.mentalizr.scheduler.configuration.JobConfigurationsManager;
 import org.mentalizr.scheduler.processManagement.IntentionFile;
 import org.mentalizr.scheduler.processManagement.IntentionFile.Intention;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StatusExecutor implements CommandExecutor {
+
+    private static final Logger logger = LoggerFactory.getLogger(StatusExecutor.class);
 
     private static final int minLengthString = 44;
 
@@ -44,10 +49,26 @@ public class StatusExecutor implements CommandExecutor {
     private static final String CHANGED = Ansi.colorize("CHANGED", Attribute.RED_TEXT());
     private static final String UNKNOWN = Ansi.colorize("UNKNOWN", Attribute.YELLOW_TEXT());
 
+    @SuppressWarnings("StringConcatenationArgumentToLogCall")
     @Override
     public void execute(CliCall cliCall) throws CommandExecutorException {
+        logger.info(StatusExecutor.class.getSimpleName() + " called...");
+
+        Intention intention = IntentionFile.getIntention();
+        String intentionString;
+        if (intention == Intention.UP) {
+            intentionString = UP;
+        } else if (intention == Intention.DOWN) {
+            intentionString = INTENTION_DOWN;
+        } else if (intention == Intention.UNKNOWN) {
+            intentionString = UNKNOWN;
+        } else {
+            throw new IllegalStateException("Unknown intention: " + intention);
+        }
+
         System.out.println("mentalizr infrastructure status on "
-                + Ansi.colorize(LocalHost.getHostname(), Attribute.WHITE_TEXT(), Attribute.BOLD()));
+                + Ansi.colorize(LocalHost.getHostname(), Attribute.WHITE_TEXT(), Attribute.BOLD())
+                + " with intention " + intentionString);
 
         boolean showConfiguration
                 = cliCall.getOptionParserResultSpecific().hasOption(StatusDef.SPECIFIC_OPTION__CONFIGURATION);
@@ -60,16 +81,6 @@ public class StatusExecutor implements CommandExecutor {
                     + "[" + GitReposDir.createInstance().toAbsolutePathString() + "].");
             System.out.println(Strings.rightPad("m7r content dir:", minLengthString)
                     + "[" + ContentDir.createInstance().toAbsolutePathString() + "].");
-        }
-
-        Intention intention = IntentionFile.getIntention();
-        String intentionString = Strings.fillUpRight("Intention: ", ' ', minLengthString);
-        if (intention == Intention.UP) {
-            System.out.println(intentionString + UP);
-        } else if (intention == Intention.DOWN) {
-            System.out.println(intentionString + INTENTION_DOWN);
-        } else if (intention == Intention.UNKNOWN) {
-            System.out.println(intentionString + UNKNOWN);
         }
 
         String networkString = Strings.fillUpRight("Network [" + Const.NETWORK + "]: ", ' ', minLengthString);
@@ -250,7 +261,7 @@ public class StatusExecutor implements CommandExecutor {
         System.out.println(deamonOutString);
 
         String schedulerConfigConsistencyString = Strings.fillUpRight("scheduler config: ", ' ', minLengthString);
-        boolean consistent = Scheduler.hasConsistentConfiguration();
+        boolean consistent = Scheduler.hasUnmodifiedConfiguration();
         if (consistent) {
             schedulerConfigConsistencyString += UP_TO_DATE;
         } else {
