@@ -64,6 +64,8 @@ public class M7rScheduler {
                     sendNotificationAutostart();
                 }
             }
+        } catch (MailNotification.MailNotificationRuntimeException e) {
+            logger.error("Error sending mail notification: " + e.getMessage());
         } catch (RuntimeException | Restart.RestartException e) {
             logger.error("Auto-starting infrastructure failed: " + e.getMessage(), e);
             logger.error("Abort scheduler start-up sequence. See m7r-infra logs for more infos.");

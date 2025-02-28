@@ -54,16 +54,18 @@ public class StatusExecutor implements CommandExecutor {
     public void execute(CliCall cliCall) throws CommandExecutorException {
         logger.info(StatusExecutor.class.getSimpleName() + " called...");
 
-        Intention intention = IntentionFile.getIntention();
         String intentionString;
-        if (intention == Intention.UP) {
-            intentionString = UP;
-        } else if (intention == Intention.DOWN) {
-            intentionString = INTENTION_DOWN;
-        } else if (intention == Intention.UNKNOWN) {
-            intentionString = UNKNOWN;
+        if (IntentionFile.exists()) {
+            Intention intention = IntentionFile.getIntention();
+            if (intention == Intention.UP) {
+                intentionString = UP;
+            } else if (intention == Intention.DOWN) {
+                intentionString = INTENTION_DOWN;
+            } else {
+                throw new IllegalStateException("Unknown intention: " + intention);
+            }
         } else {
-            throw new IllegalStateException("Unknown intention: " + intention);
+            intentionString = UNKNOWN;
         }
 
         System.out.println("mentalizr infrastructure status on "
