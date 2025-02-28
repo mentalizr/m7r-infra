@@ -48,7 +48,12 @@ public class IntentionFile {
         }
         if (line.toUpperCase().equals(Intention.UP.toString())) return Intention.UP;
         if (line.toUpperCase().equals(Intention.DOWN.toString())) return Intention.DOWN;
-        return Intention.UNKNOWN;
+        throw new IllegalStateException(
+                "Illegal value [" + line + "] in intention file [" + intentionFilePath.toAbsolutePath() + "]");
+    }
+
+    public static boolean exists() {
+        return FileUtils.isExistingRegularFile(intentionFilePath);
     }
 
 }

@@ -58,7 +58,7 @@ public class Docker {
         String commandString = "> " + Strings.listing(commands, " ");
         dockerExecutionContext
                 .getLogger()
-                .debug(commandString);
+                .info(commandString);
         Console.printlnVerbose(commandString);
     }
 

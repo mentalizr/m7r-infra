@@ -13,9 +13,10 @@ import de.arthurpicht.console.config.ConsoleConfigurationBuilder;
 import de.arthurpicht.console.message.Level;
 import org.mentalizr.cli.ConsoleWriter;
 import org.mentalizr.infra.appInit.ApplicationContext;
-import org.mentalizr.infra.appInit.ApplicationInitialization;
-import org.mentalizr.infra.appInit.ApplicationInitializationException;
+import org.mentalizr.infra.appInit.InfraApplicationInitialization;
+import org.mentalizr.infra.appInit.InfraApplicationInitializationException;
 import org.mentalizr.infra.executors.*;
+import org.mentalizr.scheduler.SchedulerRuntimeException;
 
 public class InfraCli {
 
@@ -120,9 +121,12 @@ public class InfraCli {
         );
 
         try {
-            ApplicationInitialization.execute(new GlobalOptions(cliCall));
-        } catch (ApplicationInitializationException e) {
+            InfraApplicationInitialization.asCli(new GlobalOptions(cliCall));
+        } catch (InfraApplicationInitializationException | SchedulerRuntimeException e) {
             ConsoleWriter.error(e.getMessage());
+            if (globalOptions.showStacktrace()) {
+                Console.printStackTrace(e);
+            }
             System.exit(1);
         }
 

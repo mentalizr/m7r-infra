@@ -1,7 +1,5 @@
 package org.mentalizr.infra.scheduler;
 
-import org.mentalizr.scheduler.M7rSchedulerException;
-import org.mentalizr.scheduler.configuration.JobConfigurations;
 import org.mentalizr.scheduler.configuration.JobConfigurationsManager;
 import org.mentalizr.scheduler.configuration.SchedulerActiveFlagFile;
 import org.mentalizr.scheduler.processManagement.SchedulerProcess;
@@ -50,12 +48,8 @@ public class Scheduler {
         }
     }
 
-    public static boolean hasConsistentConfiguration() {
-        try {
-            return JobConfigurationsManager.hasConsistentConfiguration();
-        } catch (M7rSchedulerException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
+    public static boolean hasUnmodifiedConfiguration() {
+        return JobConfigurationsManager.hasUnmodifiedConfiguration();
     }
 
 }

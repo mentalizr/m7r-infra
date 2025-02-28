@@ -65,7 +65,7 @@ public class SchedulerShowExecutor implements CommandExecutor {
                 .withNoLineFeed()
                 .build());
 
-        boolean consistent = Scheduler.hasConsistentConfiguration();
+        boolean consistent = Scheduler.hasUnmodifiedConfiguration();
         if (consistent) {
             Console.out(new MessageBuilder()
                     .addText("UP-TO-DATE", BlockFormat.GREEN_TEXT())

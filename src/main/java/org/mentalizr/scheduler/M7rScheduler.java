@@ -4,15 +4,14 @@ import de.arthurpicht.utils.core.exception.ExceptionUtils;
 import de.arthurpicht.utils.core.system.SystemUtils;
 import org.mentalizer.mailer.notifier.MailNotification;
 import org.mentalizer.mailer.notifier.MailNotifier;
-import org.mentalizr.infra.appInit.ApplicationContext;
+import org.mentalizr.infra.appInit.InfraApplicationInitialization;
+import org.mentalizr.infra.appInit.InfraApplicationInitializationException;
 import org.mentalizr.infra.executors.Restart;
 import org.mentalizr.infra.externalApi.StatusSummary;
-import org.mentalizr.scheduler.appInit.ApplicationInitialization;
-import org.mentalizr.scheduler.appInit.ApplicationInitializationException;
 import org.mentalizr.scheduler.configuration.JobConfigurations;
 import org.mentalizr.scheduler.configuration.JobConfigurationsManager;
-import org.mentalizr.scheduler.configuration.SchedulerConfig;
-import org.mentalizr.scheduler.configuration.SchedulerConfigLoader;
+import org.mentalizr.scheduler.configuration.infra.InfraConfig;
+import org.mentalizr.scheduler.configuration.infra.InfraConfigLoader;
 import org.mentalizr.scheduler.helper.LinuxHelper;
 import org.mentalizr.scheduler.jobInitialization.JobInitializer;
 import org.mentalizr.scheduler.mailNotifier.SchedulerMailNotifierCallback;
@@ -32,8 +31,8 @@ public class M7rScheduler {
     public static void main(String[] args) {
 
         try {
-            ApplicationInitialization.execute();
-        } catch (ApplicationInitializationException e) {
+            InfraApplicationInitialization.asScheduler();
+        } catch (InfraApplicationInitializationException | SchedulerRuntimeException e) {
             logger.error(e.getMessage(), e);
             System.exit(1);
         }
@@ -53,19 +52,20 @@ public class M7rScheduler {
         }
 
         try {
-            SchedulerConfig schedulerConfig = SchedulerConfigLoader.load();
-            if (schedulerConfig.isInfraAutostart()) {
+            InfraConfig infraConfig = InfraConfigLoader.load();
+            if (infraConfig.isInfraAutostart()) {
                 logger.info("auto-starting infrastructure ...");
-                ApplicationContext.initializeWithDefaults();
                 StatusSummary statusSummary = StatusSummary.create();
                 if (statusSummary.isRunning()) {
-                    logger.info("Infrastructure is already running.");
+                    logger.info("Infrastructure is already running. No autostart performed.");
                 } else {
                     Restart.perform();
-                    logger.warn("m7r infrastructure restarted.");
+                    logger.warn("Infrastructure successfully started by autostart.");
                     sendNotificationAutostart();
                 }
             }
+        } catch (MailNotification.MailNotificationRuntimeException e) {
+            logger.error("Error sending mail notification: " + e.getMessage());
         } catch (RuntimeException | Restart.RestartException e) {
             logger.error("Auto-starting infrastructure failed: " + e.getMessage(), e);
             logger.error("Abort scheduler start-up sequence. See m7r-infra logs for more infos.");

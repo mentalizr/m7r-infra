@@ -2,9 +2,8 @@ package org.mentalizr.scheduler.jobFactories;
 
 import de.arthurpicht.configuration.Configuration;
 import de.arthurpicht.configuration.ConfigurationFactory;
-import de.arthurpicht.configuration.ConfigurationFileNotFoundException;
-import org.mentalizr.scheduler.M7rSchedulerConfigurationException;
-import org.mentalizr.scheduler.M7rSchedulerException;
+import org.mentalizr.scheduler.configuration.JobConfigurationException;
+import org.mentalizr.scheduler.helper.ConfigurationHelper;
 import org.mentalizr.scheduler.jobs.BaseConfiguration;
 import org.mentalizr.scheduler.jobs.BaseConfigurationParser;
 import org.mentalizr.scheduler.jobs.JobConfiguration;
@@ -15,14 +14,13 @@ import org.mentalizr.scheduler.jobs.heartbeat.HeartbeatConfigurationParser;
 import org.mentalizr.scheduler.jobs.watchdog.WatchdogConfiguration;
 import org.mentalizr.scheduler.jobs.watchdog.WatchdogConfigurationParser;
 
-import java.io.IOException;
 import java.nio.file.Path;
 
 public class JobConfigurationFactory {
 
     public static JobConfiguration create(Path configurationFile) {
 
-        ConfigurationFactory configurationFactory = obtainConfigurationFactory(configurationFile);
+        ConfigurationFactory configurationFactory = ConfigurationHelper.bindConfigFile(configurationFile);
         BaseConfiguration baseConfiguration = getBaseConfiguration(configurationFile, configurationFactory);
 
         if (configurationFactory.hasSection(ActivityStatWeeklyConfiguration.SECTION_NAME)) {
@@ -51,20 +49,9 @@ public class JobConfigurationFactory {
             return watchdogConfigurationParser.parse();
 
         } else {
-            throw new M7rSchedulerConfigurationException("No valid scheduler configuration: " +
+            throw new JobConfigurationException("No valid scheduler configuration: " +
                     "[" + configurationFile.toAbsolutePath() + "]. Section name not recognized.");
         }
-    }
-
-    private static ConfigurationFactory obtainConfigurationFactory(Path configurationFile) {
-        ConfigurationFactory configurationFactory = new ConfigurationFactory();
-        try {
-            configurationFactory.addConfigurationFileFromFilesystem(configurationFile.toFile());
-        } catch (ConfigurationFileNotFoundException | IOException e) {
-            throw new M7rSchedulerException("Error binding scheduler configuration file ["
-                    + configurationFile.toAbsolutePath() + "]: " + e.getMessage(), e);
-        }
-        return configurationFactory;
     }
 
     private static BaseConfiguration getBaseConfiguration(
