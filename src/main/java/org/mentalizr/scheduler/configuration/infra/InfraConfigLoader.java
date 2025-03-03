@@ -23,16 +23,23 @@ public class InfraConfigLoader {
                 configuration,
                 Sets.newHashSet(INFRA_AUTOSTART, LOG_LEVEL_SCHEDULER, LOG_LEVEL_INFRA, LOG_LEVEL_DOCKER));
 
-        boolean autostart = ConfigurationHelper.getMandatoryBoolean(configuration, INFRA_AUTOSTART, M7R_INFRA_CONFIG_FILE);
-        Level levelInfra = ConfigurationHelper.getLevel(configuration, LOG_LEVEL_INFRA, Level.INFO, M7R_INFRA_CONFIG_FILE);
-        Level levelScheduler = ConfigurationHelper.getLevel(configuration, LOG_LEVEL_SCHEDULER, Level.INFO, M7R_INFRA_CONFIG_FILE);
-        Level levelDocker = ConfigurationHelper.getLevel(configuration, LOG_LEVEL_DOCKER, Level.INFO, M7R_INFRA_CONFIG_FILE);
+        boolean autostart
+                = ConfigurationHelper.getMandatoryBoolean(configuration, INFRA_AUTOSTART, M7R_INFRA_CONFIG_FILE);
+        Level logLevelInfra
+                = ConfigurationHelper.getLevel(
+                        configuration, LOG_LEVEL_INFRA, LOG_LEVEL_INFRA_DEFAULT, M7R_INFRA_CONFIG_FILE);
+        Level logLevelScheduler
+                = ConfigurationHelper.getLevel(
+                        configuration, LOG_LEVEL_SCHEDULER, LOG_LEVEL_SCHEDULER_DEFAULT, M7R_INFRA_CONFIG_FILE);
+        Level logLevelDocker
+                = ConfigurationHelper.getLevel(
+                        configuration, LOG_LEVEL_DOCKER, LOG_LEVEL_DOCKER_DEFAULT, M7R_INFRA_CONFIG_FILE);
 
         return new InfraConfig(
                 autostart,
-                levelInfra,
-                levelScheduler,
-                levelDocker
+                logLevelInfra,
+                logLevelScheduler,
+                logLevelDocker
         );
     }
 
