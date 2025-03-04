@@ -59,8 +59,9 @@ public class M7rScheduler {
                 if (statusSummary.isRunning()) {
                     logger.info("Infrastructure is already running. No autostart performed.");
                 } else {
+                    logger.warn("Perform infrastructure restart ...");
                     Restart.perform();
-                    logger.warn("Infrastructure successfully started by autostart.");
+                    logger.info("Infrastructure successfully started by autostart.");
                     sendNotificationAutostart();
                 }
             }
