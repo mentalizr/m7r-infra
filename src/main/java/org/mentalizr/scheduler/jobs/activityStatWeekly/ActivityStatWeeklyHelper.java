@@ -1,7 +1,7 @@
 package org.mentalizr.scheduler.jobs.activityStatWeekly;
 
 import org.mentalizr.cli.commands.user.activity.stat.activityStatPeriod.ActivityStatPeriod;
-import org.mentalizr.clientSdk.activityStat.ActivityStatRequest;
+import org.mentalizr.client.api.activityStat.ActivityStatRequest;
 
 import java.util.List;
 

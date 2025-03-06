@@ -11,7 +11,7 @@ import de.arthurpicht.cli.option.VersionOption;
 import de.arthurpicht.console.Console;
 import de.arthurpicht.console.config.ConsoleConfigurationBuilder;
 import de.arthurpicht.console.message.Level;
-import org.mentalizr.cli.ConsoleWriter;
+import org.mentalizr.cli.helper.ConsoleWriter;
 import org.mentalizr.infra.appInit.ApplicationContext;
 import org.mentalizr.infra.appInit.InfraApplicationInitialization;
 import org.mentalizr.infra.appInit.InfraApplicationInitializationException;

@@ -6,10 +6,10 @@ import org.mentalizer.mailer.MailConfigurationException;
 import org.mentalizer.mailer.MailConfigurationLoader;
 import org.mentalizr.cli.commands.user.activity.stat.activityStatPeriod.ActivityStatPeriod;
 import org.mentalizr.cli.commands.user.activity.stat.activityStatPeriod.PeriodWeek;
-import org.mentalizr.clientSdk.ClientSdkException;
-import org.mentalizr.clientSdk.SessionAgent;
-import org.mentalizr.clientSdk.activityStat.ActivityStat;
-import org.mentalizr.clientSdk.activityStat.ActivityStatRequest;
+import org.mentalizr.client.api.ClientApiRuntimeException;
+import org.mentalizr.client.api.SessionAgent;
+import org.mentalizr.client.api.activityStat.ActivityStat;
+import org.mentalizr.client.api.activityStat.ActivityStatRequest;
 import org.mentalizr.scheduler.jobs.SchedulerJob;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -40,8 +40,8 @@ public class ActivityStatWeeklyJob extends SchedulerJob implements Job {
         try {
             SessionAgent sessionAgent = SessionAgent.createFromLocalConfigWithTransientCookieStorage();
             MailConfiguration mailConfiguration = obtainMailConfiguration();
-            ActivityStat.exec(sessionAgent.getRESTCallContext(), activityStatRequest, mailConfiguration, false);
-        } catch (ClientSdkException e) {
+            ActivityStat.execute(sessionAgent.getRESTCallContext(), activityStatRequest, mailConfiguration, false);
+        } catch (ClientApiRuntimeException e) {
             throw new JobExecutionException(e);
         }
 

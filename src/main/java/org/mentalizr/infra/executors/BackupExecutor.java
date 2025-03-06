@@ -11,11 +11,8 @@ public class BackupExecutor implements CommandExecutor {
 
     @Override
     public void execute(CliCall cliCall) throws CommandExecutorException {
-        System.out.println("Backup");
-
         TaskRunner taskRunner = InfraTaskRunner.create(cliCall);
         TaskRunnerResult result = taskRunner.run("backup");
-
         if (!result.isSuccess()) throw new CommandExecutorException();
     }
 

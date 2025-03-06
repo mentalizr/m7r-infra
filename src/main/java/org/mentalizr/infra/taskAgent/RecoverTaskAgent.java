@@ -5,11 +5,14 @@ import de.arthurpicht.console.config.ConsoleConfiguration;
 import de.arthurpicht.console.config.ConsoleConfigurationBuilder;
 import de.arthurpicht.consoleToSlf4j.Slf4jChannel;
 import de.arthurpicht.consoleToSlf4j.Slf4jChannelBuilder;
-import de.arthurpicht.taskRunner.task.TaskPreconditionException;
-import org.mentalizr.cli.adminApi.AdminApiException;
-import org.mentalizr.cli.adminApi.CliExternalApi;
-import org.mentalizr.cli.adminApi.DatabaseStatus;
-import org.mentalizr.cli.adminApi.Session;
+import org.mentalizr.client.RESTCallContext;
+import org.mentalizr.client.api.ClientApiRuntimeException;
+import org.mentalizr.client.api.SessionAgent;
+import org.mentalizr.client.api.common.DataBaseStatus;
+import org.mentalizr.client.api.recover.Recover;
+import org.mentalizr.client.api.recover.RecoverRequest;
+import org.mentalizr.client.api.recover.RecoverRequestFromDirectory;
+import org.mentalizr.client.api.recover.RecoverRequestFromLatest;
 import org.mentalizr.commons.paths.host.hostDir.BackupDefaultDir;
 import org.mentalizr.infra.InfraRuntimeException;
 import org.mentalizr.infra.buildEntities.Backups;
@@ -18,28 +21,18 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 
+@SuppressWarnings("StringConcatenationArgumentToLogCall")
 public class RecoverTaskAgent {
 
     private static final Logger logger = LoggerFactory.getLogger(RecoverTaskAgent.class.getSimpleName());
 
-    public static void assertDatabaseIsEmpty() throws TaskPreconditionException {
-        try {
-            Session.loginWithLocalConfiguration();
-            boolean isEmpty = !DatabaseStatus.isEmpty();
-            Session.logout();
-            if (!isEmpty) throw new TaskPreconditionException("Database not empty.");
-        } catch (AdminApiException e) {
-            throw new InfraRuntimeException("Determining database status failed. " + e.getMessage(), e);
-        }
-    }
-
     public static boolean isDatabaseNotEmpty() {
         try {
-            Session.loginWithLocalConfiguration();
-            boolean isEmpty = !DatabaseStatus.isEmpty();
-            Session.logout();
+            SessionAgent sessionAgent = SessionAgent.createFromLocalConfigWithTransientCookieStorage();
+            boolean isEmpty = !isDatabaseEmpty(sessionAgent.getRESTCallContext());
+            sessionAgent.logout();
             return isEmpty;
-        } catch (AdminApiException e) {
+        } catch (ClientApiRuntimeException e) {
             throw new InfraRuntimeException("Determining database status failed. " + e.getMessage(), e);
         }
     }
@@ -49,10 +42,15 @@ public class RecoverTaskAgent {
         logger.info("Recover from backup for dev.");
         ConsoleConfiguration consoleConfigurationSave = alterConsoleConfiguration();
         try {
-            Session.loginWithLocalConfiguration();
-            CliExternalApi.recover(backupDefaultDir.asPath());
-            Session.logout();
-        } catch (AdminApiException e) {
+            SessionAgent sessionAgent = SessionAgent.createFromLocalConfigWithTransientCookieStorage();
+            RecoverRequest recoverRequest = new RecoverRequestFromDirectory(
+                    backupDefaultDir.asPath(),
+                    false);
+            Recover.execute(
+                    sessionAgent.getRESTCallContext(),
+                    recoverRequest);
+            sessionAgent.logout();
+        } catch (ClientApiRuntimeException e) {
             throw new InfraRuntimeException("Recover from dev backup failed. " + e.getMessage(), e);
         } finally {
             Console.configure(consoleConfigurationSave);
@@ -66,10 +64,11 @@ public class RecoverTaskAgent {
         logger.info("Recover latest backup: [" + lastestBackupPath.toAbsolutePath() + "].");
         ConsoleConfiguration consoleConfigurationSave = alterConsoleConfiguration();
         try {
-            Session.loginWithLocalConfiguration();
-            CliExternalApi.recover(lastestBackupPath);
-            Session.logout();
-        } catch (AdminApiException e) {
+            SessionAgent sessionAgent = SessionAgent.createFromLocalConfigWithTransientCookieStorage();
+            RecoverRequest recoverRequest = new RecoverRequestFromLatest(false);
+            Recover.execute(sessionAgent.getRESTCallContext(), recoverRequest);
+            sessionAgent.logout();
+        } catch (ClientApiRuntimeException e) {
             throw new InfraRuntimeException("Recover latest backup failed. " + e.getMessage(), e);
         } finally {
             Console.configure(consoleConfigurationSave);
@@ -87,6 +86,17 @@ public class RecoverTaskAgent {
                 .build();
         Console.configure(consoleConfigurationIntermediate);
         return consoleConfigurationSave;
+    }
+
+    private static boolean isDatabaseEmpty(RESTCallContext restCallContext) throws ClientApiRuntimeException {
+        try {
+            DataBaseStatus.assertIsEmpty(restCallContext);
+            Console.printlnVerbose("DB is empty.");
+            return true;
+        } catch (DataBaseStatus.DbNotEmptyException e) {
+            Console.printlnVerbose("DB not empty: " + e.getMessage());
+            return false;
+        }
     }
 
 }
