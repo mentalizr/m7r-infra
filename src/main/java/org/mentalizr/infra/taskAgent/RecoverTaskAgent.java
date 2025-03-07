@@ -5,7 +5,7 @@ import de.arthurpicht.console.config.ConsoleConfiguration;
 import de.arthurpicht.console.config.ConsoleConfigurationBuilder;
 import de.arthurpicht.consoleToSlf4j.Slf4jChannel;
 import de.arthurpicht.consoleToSlf4j.Slf4jChannelBuilder;
-import org.mentalizr.client.RESTCallContext;
+import org.mentalizr.client.http.httpClient.HttpCallContext;
 import org.mentalizr.client.api.ClientApiRuntimeException;
 import org.mentalizr.client.api.SessionAgent;
 import org.mentalizr.client.api.common.DataBaseStatus;
@@ -88,9 +88,9 @@ public class RecoverTaskAgent {
         return consoleConfigurationSave;
     }
 
-    private static boolean isDatabaseEmpty(RESTCallContext restCallContext) throws ClientApiRuntimeException {
+    private static boolean isDatabaseEmpty(HttpCallContext httpCallContext) throws ClientApiRuntimeException {
         try {
-            DataBaseStatus.assertIsEmpty(restCallContext);
+            DataBaseStatus.assertIsEmpty(httpCallContext);
             Console.printlnVerbose("DB is empty.");
             return true;
         } catch (DataBaseStatus.DbNotEmptyException e) {
