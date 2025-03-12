@@ -19,7 +19,7 @@ public class BackupTaskAgent {
                     .withDestinationDir(backupDestinationDir.asPath())
                     .build();
             SessionAgent sessionAgent = SessionAgent.createFromLocalConfigWithTransientCookieStorage();
-            Backup.execute(sessionAgent.getRESTCallContext(), backupRequest);
+            Backup.execute(sessionAgent.getHttpCallContext(), backupRequest);
             sessionAgent.logout();
         } catch (ClientApiRuntimeException e) {
             throw new InfraRuntimeException("Backup failed. " + e.getMessage(), e);

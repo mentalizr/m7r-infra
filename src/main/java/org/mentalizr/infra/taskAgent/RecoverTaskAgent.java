@@ -29,7 +29,7 @@ public class RecoverTaskAgent {
     public static boolean isDatabaseNotEmpty() {
         try {
             SessionAgent sessionAgent = SessionAgent.createFromLocalConfigWithTransientCookieStorage();
-            boolean isEmpty = !isDatabaseEmpty(sessionAgent.getRESTCallContext());
+            boolean isEmpty = !isDatabaseEmpty(sessionAgent.getHttpCallContext());
             sessionAgent.logout();
             return isEmpty;
         } catch (ClientApiRuntimeException e) {
@@ -47,7 +47,7 @@ public class RecoverTaskAgent {
                     backupDefaultDir.asPath(),
                     false);
             Recover.execute(
-                    sessionAgent.getRESTCallContext(),
+                    sessionAgent.getHttpCallContext(),
                     recoverRequest);
             sessionAgent.logout();
         } catch (ClientApiRuntimeException e) {
@@ -66,7 +66,7 @@ public class RecoverTaskAgent {
         try {
             SessionAgent sessionAgent = SessionAgent.createFromLocalConfigWithTransientCookieStorage();
             RecoverRequest recoverRequest = new RecoverRequestFromLatest(false);
-            Recover.execute(sessionAgent.getRESTCallContext(), recoverRequest);
+            Recover.execute(sessionAgent.getHttpCallContext(), recoverRequest);
             sessionAgent.logout();
         } catch (ClientApiRuntimeException e) {
             throw new InfraRuntimeException("Recover latest backup failed. " + e.getMessage(), e);

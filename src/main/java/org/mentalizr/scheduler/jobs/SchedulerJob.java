@@ -28,20 +28,21 @@ public abstract class SchedulerJob implements Job {
         String jobConfigurationJson = getJobConfigurationAsJson(jobExecutionContext);
         JobConfiguration jobConfiguration = getJobConfiguration(jobConfigurationJson);
         if (JobHelper.isInactive()) {
-            logger.info("Scheduler is deactivated. Skipping execution of job [" + jobConfiguration.getJobName() + "].");
+            logger.debug("Scheduler is deactivated. Skipping execution of job [" + jobConfiguration.getJobName() + "].");
             return;
         }
         if (!jobConfiguration.baseConfiguration.isEnabled()) {
-            logger.info("Job [" + jobConfiguration.getJobName() + "] is configured as disabled. Skipping execution.");
+            logger.debug("Job [" + jobConfiguration.getJobName() + "] is configured as disabled. Skipping execution.");
             return;
         }
         try {
+            logger.info("Start execution of job [" + jobConfiguration.getJobName() + "].");
             schedulerExecute(jobExecutionContext, jobConfigurationJson);
-            logger.info("Finished executing job [" + jobConfiguration.getJobName() + "]");
+            logger.info("Finished executing job [" + jobConfiguration.getJobName() + "].");
             if (jobConfiguration.getBaseConfiguration().isNotifyOnSuccess())
                 sendNotificationOnSuccess(jobConfiguration);
         } catch (JobExecutionException | RuntimeException e) {
-            logger.error("Error executing job [" + jobConfiguration.getJobName() + "]", e);
+            logger.error("Error executing job [" + jobConfiguration.getJobName() + "].", e);
             if (jobConfiguration.getBaseConfiguration().isNotifyOnFailure())
                 sendNotificationOnFailure(jobConfiguration, e);
             throw e;

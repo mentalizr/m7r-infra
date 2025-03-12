@@ -9,6 +9,8 @@ import org.mentalizr.scheduler.jobs.BaseConfigurationParser;
 import org.mentalizr.scheduler.jobs.JobConfiguration;
 import org.mentalizr.scheduler.jobs.activityStatWeekly.ActivityStatWeeklyConfiguration;
 import org.mentalizr.scheduler.jobs.activityStatWeekly.ActivityStatWeeklyConfigurationParser;
+import org.mentalizr.scheduler.jobs.backup.BackupConfiguration;
+import org.mentalizr.scheduler.jobs.backup.BackupConfigurationParser;
 import org.mentalizr.scheduler.jobs.heartbeat.HeartbeatConfiguration;
 import org.mentalizr.scheduler.jobs.heartbeat.HeartbeatConfigurationParser;
 import org.mentalizr.scheduler.jobs.watchdog.WatchdogConfiguration;
@@ -47,6 +49,13 @@ public class JobConfigurationFactory {
             WatchdogConfigurationParser watchdogConfigurationParser
                     = new WatchdogConfigurationParser(baseConfiguration, watchdogSection, configurationFile);
             return watchdogConfigurationParser.parse();
+
+        } else if (configurationFactory.hasSection(BackupConfiguration.SECTION_NAME)) {
+
+            Configuration backupSection = configurationFactory.getConfiguration(BackupConfiguration.SECTION_NAME);
+            BackupConfigurationParser backupConfigurationParser
+                    = new BackupConfigurationParser(baseConfiguration, backupSection, configurationFile);
+            return backupConfigurationParser.parse();
 
         } else {
             throw new JobConfigurationException("No valid scheduler configuration: " +

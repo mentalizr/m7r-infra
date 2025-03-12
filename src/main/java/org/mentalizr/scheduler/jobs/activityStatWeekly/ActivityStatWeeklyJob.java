@@ -29,8 +29,6 @@ public class ActivityStatWeeklyJob extends SchedulerJob implements Job {
         ActivityStatWeeklyConfiguration activityStatWeeklyConfiguration
                 = getJobConfiguration(jobConfigurationJson);
 
-        logger.info("Starting job [" + activityStatWeeklyConfiguration.getJobName() + "] ...");
-
         ActivityStatPeriod activityStatPeriod = new ActivityStatPeriod(new PeriodWeek(-1));
         ActivityStatRequest activityStatRequest
                 = ActivityStatWeeklyHelper.createActivityStatRequest(
@@ -40,12 +38,10 @@ public class ActivityStatWeeklyJob extends SchedulerJob implements Job {
         try {
             SessionAgent sessionAgent = SessionAgent.createFromLocalConfigWithTransientCookieStorage();
             MailConfiguration mailConfiguration = obtainMailConfiguration();
-            ActivityStat.execute(sessionAgent.getRESTCallContext(), activityStatRequest, mailConfiguration, false);
+            ActivityStat.execute(sessionAgent.getHttpCallContext(), activityStatRequest, mailConfiguration, false);
         } catch (ClientApiRuntimeException e) {
             throw new JobExecutionException(e);
         }
-
-        logger.info("Job [" + activityStatWeeklyConfiguration.getJobName() + "] executed successfully.");
     }
 
     @Override

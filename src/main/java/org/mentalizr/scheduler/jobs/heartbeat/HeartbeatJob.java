@@ -18,7 +18,6 @@ public class HeartbeatJob extends SchedulerJob implements Job {
         HeartbeatConfiguration heartbeatConfiguration = getJobConfiguration(jobConfigurationJson);
         String logMessage = heartbeatConfiguration.logMessage();
         logger.info(logMessage);
-        logger.debug("something on debug level: {}", logMessage);
     }
 
     @Override

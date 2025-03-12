@@ -27,18 +27,12 @@ public class WatchdogJob extends SchedulerJob implements Job {
     public void schedulerExecute(JobExecutionContext jobExecutionContext, String jobConfigurationJson)
             throws JobExecutionException {
 
-        WatchdogConfiguration watchdogConfiguration
-                = getJobConfiguration(jobConfigurationJson);
-
-        logger.debug("Starting job [" + watchdogConfiguration.getJobName() + "] ...");
-
         Intention intention = IntentionFile.getIntention();
         if (intention != Intention.UP) {
             logger.debug("Intention is [" + intention + "]. Watchdog continues to sleep.");
             return;
         }
 
-//        ApplicationContext.initializeWithDefaults();
         StatusSummary statusSummary = StatusSummary.create();
 
         if (statusSummary.isRunning()) {
