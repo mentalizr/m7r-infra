@@ -7,8 +7,7 @@ import org.mentalizr.scheduler.jobs.JobConfigurationParser;
 
 import java.nio.file.Path;
 
-import static org.mentalizr.scheduler.jobs.expired.ExpiredConfiguration.EXPIRATION_DAYS_LAST_USED;
-import static org.mentalizr.scheduler.jobs.expired.ExpiredConfiguration.EXPIRATION_MONTH_UNUSED;
+import static org.mentalizr.scheduler.jobs.expired.ExpiredConfiguration.*;
 import static org.mentalizr.scheduler.jobs.heartbeat.HeartbeatConfiguration.LOG_MESSAGE;
 
 public class ExpiredConfigurationParser extends JobConfigurationParser {
@@ -22,15 +21,23 @@ public class ExpiredConfigurationParser extends JobConfigurationParser {
         checkForParameterSyntaxErrors(Sets.newHashSet(EXPIRATION_DAYS_LAST_USED, EXPIRATION_MONTH_UNUSED));
 
         Integer expirationMonthsUnused = null;
-        if (configuration.containsKey(EXPIRATION_MONTH_UNUSED)) expirationMonthsUnused = Integer.valueOf(configuration.getString(EXPIRATION_MONTH_UNUSED));
+        if (configuration.containsKey(EXPIRATION_MONTH_UNUSED)) expirationMonthsUnused
+                = Integer.valueOf(configuration.getString(EXPIRATION_MONTH_UNUSED));
+
+        boolean deleteExpiredUnused = configuration.containsKey(DELETE_UNUSED) && configuration.getBoolean(DELETE_UNUSED);
 
         Integer expirationDaysLastUsed = null;
-        if (configuration.containsKey(EXPIRATION_DAYS_LAST_USED)) expirationDaysLastUsed = Integer.valueOf(configuration.getString(EXPIRATION_DAYS_LAST_USED));
+        if (configuration.containsKey(EXPIRATION_DAYS_LAST_USED)) expirationDaysLastUsed
+                = Integer.valueOf(configuration.getString(EXPIRATION_DAYS_LAST_USED));
+
+        boolean deleteExpiredUsed = configuration.containsKey(DELETE_USED) && configuration.getBoolean(DELETE_USED);
 
         return new ExpiredConfiguration(
                 baseConfiguration,
                 expirationMonthsUnused,
-                expirationDaysLastUsed
+                deleteExpiredUnused,
+                expirationDaysLastUsed,
+                deleteExpiredUsed
         );
     }
 

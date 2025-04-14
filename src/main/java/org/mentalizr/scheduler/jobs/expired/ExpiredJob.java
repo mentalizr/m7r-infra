@@ -5,7 +5,11 @@ import de.arthurpicht.utils.core.exception.ExceptionUtils;
 import de.arthurpicht.utils.core.system.SystemUtils;
 import org.mentalizer.mailer.notifier.MailNotification;
 import org.mentalizer.mailer.notifier.MailNotifier;
+import org.mentalizr.client.api.ClientApiRuntimeException;
+import org.mentalizr.client.api.SessionAgent;
+import org.mentalizr.client.api.deleteExpired.AccessKeyDeleteExpired;
 import org.mentalizr.client.api.deleteExpired.AccessKeyDeleteExpiredRequest;
+import org.mentalizr.client.api.deleteExpired.AccessKeyDeleteExpiredResult;
 import org.mentalizr.infra.executors.Restart;
 import org.mentalizr.infra.externalApi.StatusSummary;
 import org.mentalizr.scheduler.jobs.SchedulerJob;
@@ -30,11 +34,26 @@ public class ExpiredJob extends SchedulerJob implements Job {
 
         ExpiredConfiguration expiredConfiguration = getJobConfiguration(jobConfigurationJson);
 
-//        AccessKeyDeleteExpiredRequest request = new AccessKeyDeleteExpiredRequest(
-//                expiredConfiguration.getExpirationMonthUnused(),
-//                expiredConfiguration.getExpirationDaysLastUsed(),
-//
-//        )
+        AccessKeyDeleteExpiredRequest request = new AccessKeyDeleteExpiredRequest(
+                expiredConfiguration.getExpirationMonthUnused(),
+                expiredConfiguration.getExpirationDaysLastUsed(),
+                expiredConfiguration.isDeleteExpiredUsed(),
+                expiredConfiguration.isDeleteExpiredUnused(),
+                false,
+                false
+        );
+
+        AccessKeyDeleteExpiredResult result;
+        try {
+            SessionAgent sessionAgent = SessionAgent.createFromLocalConfigWithTransientCookieStorage();
+            result = AccessKeyDeleteExpired.execute(request, sessionAgent.getHttpCallContext());
+            sessionAgent.logout();
+        } catch (ClientApiRuntimeException e) {
+            throw new JobExecutionException(e);
+        }
+
+
+
 //
 //        Intention intention = IntentionFile.getIntention();
 //        if (intention != Intention.UP) {
@@ -62,6 +81,13 @@ public class ExpiredJob extends SchedulerJob implements Job {
     @Override
     public ExpiredConfiguration getJobConfiguration(String jobConfigurationJson) {
         return new Gson().fromJson(jobConfigurationJson, ExpiredConfiguration.class);
+    }
+
+    private void sendNotification(AccessKeyDeleteExpiredResult result) {
+
+        result.deletedUnused();
+
+//        if (result.accessKeyCollectionExpiredUnused().getCollection().isEmpty()) {}
     }
 
     private void sendNotificationRestart() {
