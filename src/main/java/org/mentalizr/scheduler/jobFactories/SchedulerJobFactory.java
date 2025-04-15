@@ -5,6 +5,8 @@ import org.mentalizr.scheduler.jobs.activityStatWeekly.ActivityStatWeeklyConfigu
 import org.mentalizr.scheduler.jobs.activityStatWeekly.ActivityStatWeeklyJob;
 import org.mentalizr.scheduler.jobs.backup.BackupConfiguration;
 import org.mentalizr.scheduler.jobs.backup.BackupJob;
+import org.mentalizr.scheduler.jobs.expired.ExpiredConfiguration;
+import org.mentalizr.scheduler.jobs.expired.ExpiredJob;
 import org.mentalizr.scheduler.jobs.heartbeat.HeartbeatConfiguration;
 import org.mentalizr.scheduler.jobs.heartbeat.HeartbeatJob;
 import org.mentalizr.scheduler.jobs.watchdog.WatchdogConfiguration;
@@ -22,6 +24,8 @@ public class SchedulerJobFactory {
             return WatchdogJob.class;
         } else if (jobConfiguration instanceof BackupConfiguration) {
             return BackupJob.class;
+        } else if (jobConfiguration instanceof ExpiredConfiguration) {
+            return ExpiredJob.class;
         }
         throw new IllegalStateException("Unsupported job configuration type: " + jobConfiguration.getClass().getName());
     }

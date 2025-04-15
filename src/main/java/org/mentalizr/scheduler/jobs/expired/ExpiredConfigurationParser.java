@@ -18,7 +18,12 @@ public class ExpiredConfigurationParser extends JobConfigurationParser {
 
     @Override
     public ExpiredConfiguration parse() {
-        checkForParameterSyntaxErrors(Sets.newHashSet(EXPIRATION_DAYS_LAST_USED, EXPIRATION_MONTH_UNUSED));
+        checkForParameterSyntaxErrors(Sets.newHashSet(
+                EXPIRATION_DAYS_LAST_USED,
+                EXPIRATION_MONTH_UNUSED,
+                DELETE_UNUSED,
+                DELETE_USED
+        ));
 
         Integer expirationMonthsUnused = null;
         if (configuration.containsKey(EXPIRATION_MONTH_UNUSED)) expirationMonthsUnused

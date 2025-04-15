@@ -1,6 +1,7 @@
 package org.mentalizr.scheduler.jobs.expired;
 
 import com.google.gson.Gson;
+import de.arthurpicht.console.Console;
 import de.arthurpicht.utils.core.exception.ExceptionUtils;
 import de.arthurpicht.utils.core.system.SystemUtils;
 import org.mentalizer.mailer.notifier.MailNotification;
@@ -43,6 +44,8 @@ public class ExpiredJob extends SchedulerJob implements Job {
                 false
         );
 
+        logger.debug(request.toString());
+
         AccessKeyDeleteExpiredResult result;
         try {
             SessionAgent sessionAgent = SessionAgent.createFromLocalConfigWithTransientCookieStorage();
@@ -52,30 +55,13 @@ public class ExpiredJob extends SchedulerJob implements Job {
             throw new JobExecutionException(e);
         }
 
+        if (result.foundExpired()) {
+            logger.info("Expired users were found. Send notification.");
+            sendNotification(result);
+        } else {
+            logger.info("No expired users found.");
+        }
 
-
-//
-//        Intention intention = IntentionFile.getIntention();
-//        if (intention != Intention.UP) {
-//            logger.debug("Intention is [" + intention + "]. Watchdog continues to sleep.");
-//            return;
-//        }
-//
-//        StatusSummary statusSummary = StatusSummary.create();
-//
-//        if (statusSummary.isRunning()) {
-//            logger.debug("Intention is UP and m7r infrastructure is running. Watchdog continues to sleep.");
-//        } else {
-//            logger.warn("Intention is UP and m7r infrastructure is not running. Try to restart ...");
-//            try {
-//                Restart.perform();
-//                logger.warn("m7r infrastructure restarted.");
-//                sendNotificationRestart();
-//            } catch (Restart.RestartException e) {
-//                logger.error("Restart failed.", e);
-//                sendNotificationRestartFailed(e);
-//            }
-//        }
     }
 
     @Override
@@ -84,27 +70,10 @@ public class ExpiredJob extends SchedulerJob implements Job {
     }
 
     private void sendNotification(AccessKeyDeleteExpiredResult result) {
-
-        result.deletedUnused();
-
-//        if (result.accessKeyCollectionExpiredUnused().getCollection().isEmpty()) {}
-    }
-
-    private void sendNotificationRestart() {
         MailNotification mailNotification = new MailNotification(
-                "[" + SystemUtils.getHostname() + "] restarted by watchdog job",
-                "System [" + SystemUtils.getHostname() + "] was found down UP by watchdog job while intention ip UP.\n"
-                        + "m7r infrastructure was restarted successfully.");
-        MailNotifier.sendNotification(mailNotification, new SchedulerMailNotifierCallback());
-    }
-
-    private void sendNotificationRestartFailed(Exception e) {
-        String stacktrace = ExceptionUtils.getStackTrace(e);
-        MailNotification mailNotification = new MailNotification(
-                "[" + SystemUtils.getHostname() + "] FAILED restart by watchdog job",
-                "System [" + SystemUtils.getHostname() + "] was found down with intention UP by watchdog job.\n"
-                        + "watchdog job failed to restart m7r infrastructure.\n\n"
-                        + stacktrace);
+                "[" + SystemUtils.getHostname() + "] has expired users",
+                "expired users on [" + SystemUtils.getHostname() + "]:\n\n"
+                        + result.getSummary());
         MailNotifier.sendNotification(mailNotification, new SchedulerMailNotifierCallback());
     }
 
