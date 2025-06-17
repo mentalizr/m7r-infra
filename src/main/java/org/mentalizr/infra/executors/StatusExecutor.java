@@ -8,9 +8,11 @@ import de.arthurpicht.cli.CommandExecutorException;
 import de.arthurpicht.utils.core.strings.Strings;
 import org.mentalizr.commons.paths.client.M7rClientDir;
 import org.mentalizr.commons.paths.host.ContentDir;
+import org.mentalizr.commons.paths.host.ContentTestDir;
 import org.mentalizr.commons.paths.host.GitReposDir;
 import org.mentalizr.commons.paths.host.hostDir.M7rHostDir;
 import org.mentalizr.infra.Const;
+import org.mentalizr.infra.appInit.ApplicationContext;
 import org.mentalizr.infra.buildEntities.connections.ConnectionMaria;
 import org.mentalizr.infra.buildEntities.connections.ConnectionMongo;
 import org.mentalizr.infra.buildEntities.connections.ConnectionTomcat;
@@ -26,12 +28,16 @@ import org.mentalizr.scheduler.processManagement.IntentionFile.Intention;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.SQLOutput;
+
 public class StatusExecutor implements CommandExecutor {
 
     private static final Logger logger = LoggerFactory.getLogger(StatusExecutor.class);
 
     private static final int minLengthString = 44;
 
+    private static final String PROD = Ansi.colorize("PROD", Attribute.WHITE_TEXT());
+    private static final String DEV = Ansi.colorize("DEV", Attribute.WHITE_TEXT());
     private static final String UP = Ansi.colorize("UP", Attribute.GREEN_TEXT());
     private static final String INTENTION_DOWN = Ansi.colorize("DOWN", Attribute.RED_TEXT());
     private static final String PRESENT = Ansi.colorize("PRESENT", Attribute.GREEN_TEXT());
@@ -72,6 +78,8 @@ public class StatusExecutor implements CommandExecutor {
                 + Ansi.colorize(LocalHost.getHostname(), Attribute.WHITE_TEXT(), Attribute.BOLD())
                 + " with intention " + intentionString);
 
+        System.out.println(Strings.rightPad("host type:", minLengthString) + (ApplicationContext.isDevVm() ? DEV : PROD));
+
         boolean showConfiguration
                 = cliCall.getOptionParserResultSpecific().hasOption(StatusDef.SPECIFIC_OPTION__CONFIGURATION);
         if (showConfiguration) {
@@ -83,6 +91,9 @@ public class StatusExecutor implements CommandExecutor {
                     + "[" + GitReposDir.createInstance().toAbsolutePathString() + "].");
             System.out.println(Strings.rightPad("m7r content dir:", minLengthString)
                     + "[" + ContentDir.createInstance().toAbsolutePathString() + "].");
+            System.out.println(Strings.rightPad("m7r content test dir:", minLengthString)
+                    + (ApplicationContext.isDevVm() ?
+                    "[" + ContentTestDir.createInstance().toAbsolutePathString() + "]." : "not applicable"));
         }
 
         String networkString = Strings.fillUpRight("Network [" + Const.NETWORK + "]: ", ' ', minLengthString);

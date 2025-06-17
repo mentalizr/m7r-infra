@@ -5,6 +5,7 @@ import org.mentalizr.infra.Const;
 import org.mentalizr.infra.GlobalOptions;
 import org.mentalizr.infra.Timeout;
 import org.mentalizr.infra.docker.DockerExecutionContext;
+import org.mentalizr.infra.utils.LocalHost;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 
@@ -17,6 +18,7 @@ public class ApplicationContext {
     private static Timeout timeout = Timeout.getDefaultTimeout();
     private static GlobalOptions globalOptions;
     private static DockerExecutionContext dockerExecutionContext = null;
+    private static boolean isDevVm;
 
     private static boolean isInitialized = false;
 
@@ -30,6 +32,7 @@ public class ApplicationContext {
                 .withLogLevelStdOut(Level.DEBUG)
                 .withLogLevelStdErr(Level.ERROR)
                 .build();
+        isDevVm = LocalHost.isDevVm();
         isInitialized = true;
     }
 
@@ -76,6 +79,10 @@ public class ApplicationContext {
         if (dockerExecutionContext == null)
             throw new IllegalStateException(ApplicationContext.class.getSimpleName() + " not initialized yet.");
         return dockerExecutionContext;
+    }
+
+    public static boolean isDevVm() {
+        return isDevVm;
     }
 
     private static Timeout getTimeout(GlobalOptions globalOptions) {

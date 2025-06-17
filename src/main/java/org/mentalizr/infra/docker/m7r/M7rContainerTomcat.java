@@ -3,12 +3,15 @@ package org.mentalizr.infra.docker.m7r;
 import de.arthurpicht.processExecutor.ProcessResultCollection;
 import de.arthurpicht.taskRunner.task.TaskPreconditionException;
 import org.mentalizr.commons.EnvVarConfig;
+import org.mentalizr.commons.helper.StringList;
 import org.mentalizr.commons.paths.M7rPaths;
 import org.mentalizr.commons.paths.build.M7rWarFile;
 import org.mentalizr.commons.paths.container.TomcatContainerContentDir;
+import org.mentalizr.commons.paths.container.TomcatContainerContentTestDir;
 import org.mentalizr.commons.paths.container.TomcatContainerImgBaseTmpDir;
 import org.mentalizr.commons.paths.container.TomcatContainerWebAppsDir;
 import org.mentalizr.commons.paths.host.ContentDir;
+import org.mentalizr.commons.paths.host.ContentTestDir;
 import org.mentalizr.commons.paths.host.GitReposDir;
 import org.mentalizr.commons.paths.host.hostDir.TomcatLogDir;
 import org.mentalizr.infra.Const;
@@ -23,6 +26,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 public class M7rContainerTomcat {
 
@@ -37,23 +42,49 @@ public class M7rContainerTomcat {
 
         DockerExecutionContext context = ApplicationContext.getDockerExecutionContext();
         Path imageBaseTempDir = GitReposDir.createInstance().asPath().resolve("core/m7r-img-base-tmp");
+
+        StringList parameterList = new StringList();
+        parameterList.add(
+                "docker", "create",
+                "--name", Const.CONTAINER_TOMCAT,
+                "--network", Const.NETWORK,
+                "--network-alias", "tomcat",
+                "-e", "TIME_ZONE=\"Europe/Berlin\"",
+                "-e", EnvVarConfig.MENTALIZR_HOST_DIR + "=" + CONTAINER__MENTALIZR_HOST_DIR,
+                "--mount", "source=" + Const.VOLUME_TOMCAT +",target=" + new TomcatContainerWebAppsDir().toAbsolutePathString(),
+                "--mount", "type=bind,source=" + ContentDir.createInstance().toAbsolutePathString() + ",target=" + new TomcatContainerContentDir().toAbsolutePathString()
+        );
+        if (ApplicationContext.isDevVm()) {
+            logger.debug("Host detected as DEV-VM. Mount test content directory.");
+            parameterList.add("--mount", "type=bind,source=" + ContentTestDir.createInstance().toAbsolutePathString() + ",target=" + new TomcatContainerContentTestDir().toAbsolutePathString());
+        }
+        parameterList.add(
+                "--mount", "type=bind,source=" + imageBaseTempDir.toAbsolutePath() + ",target=" + new TomcatContainerImgBaseTmpDir().toAbsolutePathString(),
+                "--mount", "type=bind,source=" + new TomcatLogDir().toAbsolutePathString() + ",target=/man/tomcat/logs",
+                "--mount", "type=bind,source=" + M7rPaths.getM7rHostDir().toAbsolutePathString() + ",target=" + CONTAINER__MENTALIZR_HOST_DIR,
+                "-p", "8080:8080",
+                Const.IMAGE_TOMCAT
+        );
+
         ProcessResultCollection result;
         try {
             result = Docker.call(
                     context,
-                    "docker", "create",
-                    "--name", Const.CONTAINER_TOMCAT,
-                    "--network", Const.NETWORK,
-                    "--network-alias", "tomcat",
-                    "-e", "TIME_ZONE=\"Europe/Berlin\"",
-                    "-e", EnvVarConfig.MENTALIZR_HOST_DIR + "=" + CONTAINER__MENTALIZR_HOST_DIR,
-                    "--mount", "source=" + Const.VOLUME_TOMCAT +",target=" + new TomcatContainerWebAppsDir().toAbsolutePathString(),
-                    "--mount", "type=bind,source=" + ContentDir.createInstance().toAbsolutePathString() + ",target=" + new TomcatContainerContentDir().toAbsolutePathString(),
-                    "--mount", "type=bind,source=" + imageBaseTempDir.toAbsolutePath() + ",target=" + new TomcatContainerImgBaseTmpDir().toAbsolutePathString(),
-                    "--mount", "type=bind,source=" + new TomcatLogDir().toAbsolutePathString() + ",target=/man/tomcat/logs",
-                    "--mount", "type=bind,source=" + M7rPaths.getM7rHostDir().toAbsolutePathString() + ",target=" + CONTAINER__MENTALIZR_HOST_DIR,
-                    "-p", "8080:8080",
-                    Const.IMAGE_TOMCAT);
+                    parameterList.asArray()
+//                    "docker", "create",
+//                    "--name", Const.CONTAINER_TOMCAT,
+//                    "--network", Const.NETWORK,
+//                    "--network-alias", "tomcat",
+//                    "-e", "TIME_ZONE=\"Europe/Berlin\"",
+//                    "-e", EnvVarConfig.MENTALIZR_HOST_DIR + "=" + CONTAINER__MENTALIZR_HOST_DIR,
+//                    "--mount", "source=" + Const.VOLUME_TOMCAT +",target=" + new TomcatContainerWebAppsDir().toAbsolutePathString(),
+//                    "--mount", "type=bind,source=" + ContentDir.createInstance().toAbsolutePathString() + ",target=" + new TomcatContainerContentDir().toAbsolutePathString(),
+//                    "--mount", "type=bind,source=" + imageBaseTempDir.toAbsolutePath() + ",target=" + new TomcatContainerImgBaseTmpDir().toAbsolutePathString(),
+//                    "--mount", "type=bind,source=" + new TomcatLogDir().toAbsolutePathString() + ",target=/man/tomcat/logs",
+//                    "--mount", "type=bind,source=" + M7rPaths.getM7rHostDir().toAbsolutePathString() + ",target=" + CONTAINER__MENTALIZR_HOST_DIR,
+//                    "-p", "8080:8080",
+//                    Const.IMAGE_TOMCAT
+            );
         } catch (DockerExecutionException e) {
             throw new InfraRuntimeException(e);
         }
