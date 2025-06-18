@@ -3,9 +3,12 @@ package org.mentalizr.scheduler.jobs.watchdog;
 import com.google.gson.Gson;
 import de.arthurpicht.utils.core.exception.ExceptionUtils;
 import de.arthurpicht.utils.core.system.SystemUtils;
+import de.arthurpicht.utils.io.maxExecutionLimiter.MaxExecutionLimiter;
+import de.arthurpicht.utils.io.maxExecutionLimiter.MaxExecutionLimiterException;
+import de.arthurpicht.utils.io.maxExecutionLimiter.MaxExecutionLimiters;
+import de.arthurpicht.utils.io.maxExecutionLimiter.Permission;
 import org.mentalizer.mailer.notifier.MailNotification;
 import org.mentalizer.mailer.notifier.MailNotifier;
-import org.mentalizr.infra.appInit.ApplicationContext;
 import org.mentalizr.infra.executors.Restart;
 import org.mentalizr.infra.externalApi.StatusSummary;
 import org.mentalizr.scheduler.jobs.SchedulerJob;
@@ -14,7 +17,6 @@ import org.mentalizr.scheduler.processManagement.IntentionFile;
 import org.mentalizr.scheduler.processManagement.IntentionFile.Intention;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,8 +26,7 @@ public class WatchdogJob extends SchedulerJob implements Job {
     private static final Logger logger = LoggerFactory.getLogger(WatchdogJob.class);
 
     @Override
-    public void schedulerExecute(JobExecutionContext jobExecutionContext, String jobConfigurationJson)
-            throws JobExecutionException {
+    public void schedulerExecute(JobExecutionContext jobExecutionContext, String jobConfigurationJson) {
 
         Intention intention = IntentionFile.getIntention();
         if (intention != Intention.UP) {
@@ -40,9 +41,16 @@ public class WatchdogJob extends SchedulerJob implements Job {
         } else {
             logger.warn("Intention is UP and m7r infrastructure is not running. Try to restart ...");
             try {
+                MaxExecutionLimiter maxExecutionLimiter
+                        = MaxExecutionLimiters.perDay(5, new M7rInfraRestartFile().asPath());
+                Permission permission = maxExecutionLimiter.requestExecutionPermission();
+
                 Restart.perform();
                 logger.warn("m7r infrastructure restarted.");
-                sendNotificationRestart();
+                if (permission.isMaxExecutionReached()) logger.warn("daily limit of restart reached.");
+                sendNotificationRestart(permission.isMaxExecutionReached());
+            } catch (MaxExecutionLimiterException e) {
+                logger.warn("Daily limit of restart exceeded. Restart prevented.");
             } catch (Restart.RestartException e) {
                 logger.error("Restart failed.", e);
                 sendNotificationRestartFailed(e);
@@ -55,11 +63,17 @@ public class WatchdogJob extends SchedulerJob implements Job {
         return new Gson().fromJson(jobConfigurationJson, WatchdogConfiguration.class);
     }
 
-    private void sendNotificationRestart() {
-        MailNotification mailNotification = new MailNotification(
-                "[" + SystemUtils.getHostname() + "] restarted by watchdog job",
-                "System [" + SystemUtils.getHostname() + "] was found down UP by watchdog job while intention ip UP.\n"
-                        + "m7r infrastructure was restarted successfully.");
+    private void sendNotificationRestart(boolean maxRestartReached) {
+        String subject = "[" + SystemUtils.getHostname() + "] restarted by watchdog job";
+        if (maxRestartReached) subject += " - limit reached";
+
+        String text = "System [" + SystemUtils.getHostname() + "] was found DOWN by watchdog job while " +
+                "intention ip UP.\n"
+                + "m7r infrastructure was restarted successfully.";
+        if (maxRestartReached) text += "\n Limit of daily restarts is reached. " +
+                "No further restarts will be preformed today.";
+
+        MailNotification mailNotification = new MailNotification(subject, text);
         MailNotifier.sendNotification(mailNotification, new SchedulerMailNotifierCallback());
     }
 
