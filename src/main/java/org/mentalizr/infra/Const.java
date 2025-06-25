@@ -6,11 +6,11 @@ public class Const {
 
     public static final String NETWORK = "m7r";
 
-    public static final String IMAGE_MONGO = "mongo:4.4";
+    public static final String IMAGE_MONGO = "mongo:8.0";
     public static final String VOLUME_MONGO = "m7r-mongo-vol";
     public static final String CONTAINER_MONGO = "m7r-mongo";
 
-    public static final String IMAGE_MARIA = "mariadb:10.11";
+    public static final String IMAGE_MARIA = "mariadb:11.8";
     public static final String VOLUME_MARIA = "m7r-maria-vol";
     public static final String CONTAINER_MARIA = "m7r-maria";
 
