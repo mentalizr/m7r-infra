@@ -5,14 +5,14 @@ import de.arthurpicht.console.config.ConsoleConfiguration;
 import de.arthurpicht.console.config.ConsoleConfigurationBuilder;
 import de.arthurpicht.consoleToSlf4j.Slf4jChannel;
 import de.arthurpicht.consoleToSlf4j.Slf4jChannelBuilder;
-import org.mentalizr.client.http.httpClient.HttpCallContext;
 import org.mentalizr.client.api.ClientApiRuntimeException;
 import org.mentalizr.client.api.SessionAgent;
 import org.mentalizr.client.api.common.DataBaseStatus;
 import org.mentalizr.client.api.recover.Recover;
-import org.mentalizr.client.api.recover.RecoverRequest;
-import org.mentalizr.client.api.recover.RecoverRequestFromDirectory;
-import org.mentalizr.client.api.recover.RecoverRequestFromLatest;
+import org.mentalizr.client.api.recover.RecoverLatest;
+import org.mentalizr.client.api.recover.RecoverRequestFull;
+import org.mentalizr.client.api.recover.RecoverRequestLatest;
+import org.mentalizr.client.http.httpClient.HttpCallContext;
 import org.mentalizr.commons.paths.host.hostDir.BackupDefaultDir;
 import org.mentalizr.infra.InfraRuntimeException;
 import org.mentalizr.infra.buildEntities.Backups;
@@ -43,12 +43,11 @@ public class RecoverTaskAgent {
         ConsoleConfiguration consoleConfigurationSave = alterConsoleConfiguration();
         try {
             SessionAgent sessionAgent = SessionAgent.createFromLocalConfigWithTransientCookieStorage();
-            RecoverRequest recoverRequest = new RecoverRequestFromDirectory(
+            RecoverRequestFull recoverRequestFull = new RecoverRequestFull(
                     backupDefaultDir.asPath(),
-                    false);
-            Recover.execute(
-                    sessionAgent.getHttpCallContext(),
-                    recoverRequest);
+                    false,
+                    true);
+            Recover.execute(recoverRequestFull, sessionAgent.getHttpCallContext());
             sessionAgent.logout();
         } catch (ClientApiRuntimeException e) {
             throw new InfraRuntimeException("Recover from dev backup failed. " + e.getMessage(), e);
@@ -65,8 +64,8 @@ public class RecoverTaskAgent {
         ConsoleConfiguration consoleConfigurationSave = alterConsoleConfiguration();
         try {
             SessionAgent sessionAgent = SessionAgent.createFromLocalConfigWithTransientCookieStorage();
-            RecoverRequest recoverRequest = new RecoverRequestFromLatest(false);
-            Recover.execute(sessionAgent.getHttpCallContext(), recoverRequest);
+            RecoverRequestLatest recoverRequestLatest = new RecoverRequestLatest(false);
+            RecoverLatest.execute(recoverRequestLatest, sessionAgent.getHttpCallContext());
             sessionAgent.logout();
         } catch (ClientApiRuntimeException e) {
             throw new InfraRuntimeException("Recover latest backup failed. " + e.getMessage(), e);
