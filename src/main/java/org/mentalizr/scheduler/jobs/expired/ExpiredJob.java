@@ -1,8 +1,6 @@
 package org.mentalizr.scheduler.jobs.expired;
 
 import com.google.gson.Gson;
-import de.arthurpicht.console.Console;
-import de.arthurpicht.utils.core.exception.ExceptionUtils;
 import de.arthurpicht.utils.core.system.SystemUtils;
 import org.mentalizer.mailer.notifier.MailNotification;
 import org.mentalizer.mailer.notifier.MailNotifier;
@@ -11,13 +9,8 @@ import org.mentalizr.client.api.SessionAgent;
 import org.mentalizr.client.api.deleteExpired.AccessKeyDeleteExpired;
 import org.mentalizr.client.api.deleteExpired.AccessKeyDeleteExpiredRequest;
 import org.mentalizr.client.api.deleteExpired.AccessKeyDeleteExpiredResult;
-import org.mentalizr.infra.executors.Restart;
-import org.mentalizr.infra.externalApi.StatusSummary;
 import org.mentalizr.scheduler.jobs.SchedulerJob;
-import org.mentalizr.scheduler.jobs.watchdog.WatchdogConfiguration;
 import org.mentalizr.scheduler.mailNotifier.SchedulerMailNotifierCallback;
-import org.mentalizr.scheduler.processManagement.IntentionFile;
-import org.mentalizr.scheduler.processManagement.IntentionFile.Intention;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
