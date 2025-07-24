@@ -1,9 +1,12 @@
 package org.mentalizr.scheduler.jobs.backup;
 
 import com.google.gson.Gson;
+import de.arthurpicht.console.Console;
+import de.arthurpicht.console.config.ConsoleConfiguration;
 import org.mentalizr.client.api.SessionAgent;
 import org.mentalizr.client.api.backup.Backup;
 import org.mentalizr.client.api.backup.BackupRequest;
+import org.mentalizr.scheduler.helper.ConsoleHelper;
 import org.mentalizr.scheduler.jobs.SchedulerJob;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -22,7 +25,12 @@ public class BackupJob extends SchedulerJob implements Job {
         BackupRequest backupRequest = new BackupRequest.Builder().asArchive().build();
 
         SessionAgent sessionAgent = SessionAgent.createFromLocalConfigWithTransientCookieStorage();
-        Backup.execute(sessionAgent.getHttpCallContext(), backupRequest);
+        ConsoleConfiguration consoleConfigurationSave = ConsoleHelper.redirectConsoleToLog("Backup");
+        try {
+            Backup.execute(sessionAgent.getHttpCallContext(), backupRequest);
+        } finally {
+            Console.configure(consoleConfigurationSave);
+        }
         sessionAgent.logout();
     }
 
