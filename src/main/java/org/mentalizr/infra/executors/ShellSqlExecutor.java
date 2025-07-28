@@ -20,7 +20,7 @@ public class ShellSqlExecutor implements CommandExecutor {
         System.out.println("open shell on container [" + Const.CONTAINER_MARIA + "] ...");
 
         DockerExecutionContext dockerExecutionContext = ApplicationContext.getDockerExecutionContext();
-        List<String> executionCommands = Lists.newArrayList("sh", "-c", "mysql -u root -p");
+        List<String> executionCommands = Lists.newArrayList("sh", "-c", "mariadb -u root -p");
         try {
             Shell.open(dockerExecutionContext, Const.CONTAINER_MARIA, executionCommands);
         } catch (DockerExecutionException | IllegalInfraStateException e) {
