@@ -7,12 +7,12 @@ import de.arthurpicht.consoleToSlf4j.Slf4jChannel;
 import de.arthurpicht.consoleToSlf4j.Slf4jChannelBuilder;
 import org.mentalizr.client.api.ClientApiRuntimeException;
 import org.mentalizr.client.api.SessionAgent;
-import org.mentalizr.client.api.common.DataBaseStatus;
 import org.mentalizr.client.api.recover.Recover;
 import org.mentalizr.client.api.recover.RecoverLatest;
 import org.mentalizr.client.api.recover.RecoverRequestFull;
 import org.mentalizr.client.api.recover.RecoverRequestLatest;
 import org.mentalizr.client.http.httpClient.HttpCallContext;
+import org.mentalizr.client.service.ServiceCaller;
 import org.mentalizr.commons.paths.host.hostDir.BackupDefaultDir;
 import org.mentalizr.infra.InfraRuntimeException;
 import org.mentalizr.infra.buildEntities.Backups;
@@ -88,12 +88,11 @@ public class RecoverTaskAgent {
     }
 
     private static boolean isDatabaseEmpty(HttpCallContext httpCallContext) throws ClientApiRuntimeException {
-        try {
-            DataBaseStatus.assertIsEmpty(httpCallContext);
+        if (ServiceCaller.isDbEmpty(httpCallContext)) {
             Console.printlnVerbose("DB is empty.");
             return true;
-        } catch (DataBaseStatus.DbNotEmptyException e) {
-            Console.printlnVerbose("DB not empty: " + e.getMessage());
+        } else {
+            Console.printlnVerbose("DB not empty.");
             return false;
         }
     }
