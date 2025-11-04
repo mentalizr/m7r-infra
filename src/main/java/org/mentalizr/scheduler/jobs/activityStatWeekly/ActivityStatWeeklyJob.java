@@ -6,6 +6,7 @@ import de.arthurpicht.console.config.ConsoleConfiguration;
 import org.mentalizer.mailer.MailConfiguration;
 import org.mentalizer.mailer.MailConfigurationException;
 import org.mentalizer.mailer.MailConfigurationLoader;
+import org.mentalizer.mailer.MailConfigurationOptional;
 import org.mentalizr.cli.commands.user.activity.stat.activityStatPeriod.ActivityStatPeriod;
 import org.mentalizr.cli.commands.user.activity.stat.activityStatPeriod.PeriodWeek;
 import org.mentalizr.client.api.ClientApiRuntimeException;
@@ -17,13 +18,8 @@ import org.mentalizr.scheduler.jobs.SchedulerJob;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("StringConcatenationArgumentToLogCall")
 public class ActivityStatWeeklyJob extends SchedulerJob implements Job {
-
-    private static final Logger logger = LoggerFactory.getLogger(ActivityStatWeeklyJob.class);
 
     @Override
     public void schedulerExecute(JobExecutionContext jobExecutionContext, String jobConfigurationJson)
@@ -38,11 +34,17 @@ public class ActivityStatWeeklyJob extends SchedulerJob implements Job {
                 activityStatPeriod,
                 activityStatWeeklyConfiguration);
 
-        ConsoleConfiguration consoleConfigurationSave = ConsoleHelper.redirectConsoleToLog("ActivityStatWeekly");
+        ConsoleConfiguration consoleConfigurationSave
+                = ConsoleHelper.redirectConsoleToLog("ActivityStatWeekly");
+
         try {
             SessionAgent sessionAgent = SessionAgent.createFromLocalConfigWithTransientCookieStorage();
-            MailConfiguration mailConfiguration = obtainMailConfiguration();
-            ActivityStat.execute(sessionAgent.getHttpCallContext(), activityStatRequest, mailConfiguration, false);
+            MailConfigurationOptional mailConfigurationOptional = obtainMailConfigurationOptional();
+            ActivityStat.execute(
+                    sessionAgent.getHttpCallContext(),
+                    activityStatRequest,
+                    mailConfigurationOptional,
+                    false);
         } catch (ClientApiRuntimeException e) {
             throw new JobExecutionException(e);
         } finally {
@@ -55,9 +57,10 @@ public class ActivityStatWeeklyJob extends SchedulerJob implements Job {
         return new Gson().fromJson(jobConfigurationJson, ActivityStatWeeklyConfiguration.class);
     }
 
-    private MailConfiguration obtainMailConfiguration() throws JobExecutionException {
+    private MailConfigurationOptional obtainMailConfigurationOptional() {
         try {
-            return MailConfigurationLoader.load();
+            MailConfiguration mailConfiguration = MailConfigurationLoader.load();
+            return MailConfigurationOptional.create(mailConfiguration);
         } catch (MailConfigurationException e) {
             throw new RuntimeException("Error loading mail configuration: " + e.getMessage(), e);
         }
