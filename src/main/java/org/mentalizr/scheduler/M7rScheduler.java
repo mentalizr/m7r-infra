@@ -16,11 +16,15 @@ import org.mentalizr.scheduler.helper.LinuxHelper;
 import org.mentalizr.scheduler.jobInitialization.JobInitializer;
 import org.mentalizr.scheduler.mailNotifier.SchedulerMailNotifierCallback;
 import org.mentalizr.scheduler.processManagement.DaemonPidFile;
+import org.mentalizr.scheduler.processManagement.IntentionFile;
+import org.mentalizr.scheduler.processManagement.IntentionFile.Intention;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.mentalizr.scheduler.processManagement.IntentionFile.Intention.*;
 
 @SuppressWarnings("StringConcatenationArgumentToLogCall")
 public class M7rScheduler {
@@ -53,7 +57,8 @@ public class M7rScheduler {
 
         try {
             InfraConfig infraConfig = InfraConfigLoader.load();
-            if (infraConfig.isInfraAutostart()) {
+            Intention intention = IntentionFile.getIntention();
+            if (infraConfig.isInfraAutostart() && intention == UP) {
                 logger.info("auto-starting infrastructure ...");
                 StatusSummary statusSummary = StatusSummary.create();
                 if (statusSummary.isRunning()) {
@@ -64,6 +69,8 @@ public class M7rScheduler {
                     logger.info("Infrastructure successfully started by autostart.");
                     sendNotificationAutostart();
                 }
+            } else if (infraConfig.isInfraAutostart() && intention != UP) {
+                logger.debug("auto-starting of infrastructure is configured but omitted as intention is not UP.");
             }
         } catch (MailNotification.MailNotificationRuntimeException e) {
             logger.error("Error sending mail notification: " + e.getMessage());
