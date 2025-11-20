@@ -128,7 +128,8 @@ public class M7rScheduler {
     private static void sendNotificationAutostart() {
         MailNotification mailNotification = new MailNotification(
                 "[" + SystemUtils.getHostname() + "] auto-started",
-                "m7r-infrastructure on [" + SystemUtils.getHostname() + "] was auto-started by scheduler.");
+                "m7r-infrastructure on [" + SystemUtils.getHostname() + "] was auto-started by scheduler.\n" +
+                        "This could be caused due to a start or restart of the host.");
         MailNotifier.sendNotification(mailNotification, new SchedulerMailNotifierCallback());
     }
 
@@ -136,7 +137,8 @@ public class M7rScheduler {
         String stacktrace = ExceptionUtils.getStackTrace(e);
         MailNotification mailNotification = new MailNotification(
                 "[" + SystemUtils.getHostname() + "] autostart FAILED",
-                "m7r-infrastructure [" + SystemUtils.getHostname() + "] failed to be auto-started by scheduler.\n\n"
+                "m7r-infrastructure [" + SystemUtils.getHostname() + "] failed to be auto-started by scheduler.\n" +
+                        "This could be caused due to a start or restart of the host.\n\n"
                         + stacktrace);
         MailNotifier.sendNotification(mailNotification, new SchedulerMailNotifierCallback());
     }
