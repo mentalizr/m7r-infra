@@ -37,18 +37,20 @@ public class ActivityStatWeeklyJob extends SchedulerJob implements Job {
         ConsoleConfiguration consoleConfigurationSave
                 = ConsoleHelper.redirectConsoleToLog("ActivityStatWeekly");
 
+        SessionAgent sessionAgent = SessionAgent.createFromLocalConfigWithTransientCookieStorage();
         try {
-            SessionAgent sessionAgent = SessionAgent.createFromLocalConfigWithTransientCookieStorage();
             MailConfigurationOptional mailConfigurationOptional = obtainMailConfigurationOptional();
             ActivityStat.execute(
                     sessionAgent.getHttpCallContext(),
                     activityStatRequest,
                     mailConfigurationOptional,
                     false);
+
         } catch (ClientApiRuntimeException e) {
             throw new JobExecutionException(e);
         } finally {
             Console.configure(consoleConfigurationSave);
+            sessionAgent.logout();
         }
     }
 

@@ -30,8 +30,8 @@ public class BackupJob extends SchedulerJob implements Job {
             Backup.execute(sessionAgent.getHttpCallContext(), backupRequest);
         } finally {
             Console.configure(consoleConfigurationSave);
+            sessionAgent.logout();
         }
-        sessionAgent.logout();
     }
 
     @Override
